@@ -1,7 +1,7 @@
 {
   "project_name": "Palindrome Continuum",
   "theme": "Palindromic Number Theory",
-  "current_cycle": 5,
+  "current_cycle": 6,
   "frontier": [
     {
       "id": "DEF-001",

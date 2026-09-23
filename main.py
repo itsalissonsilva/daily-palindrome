@@ -58,6 +58,9 @@ def run_cycle():
     # Step 2: PM Triages Low-Hanging Fruit
     print("\n[PM Agent] Triaging Research Frontier for low-hanging fruit...")
     candidates = pm.get_low_hanging_fruit()
+    if not candidates:
+        print("[PM Agent] All currently queued frontier candidates are certified or awaiting new hypotheses.")
+        return "FRONTIER_EXHAUSTED"
     print(f"Found {len(candidates)} actionable candidate tasks ready for exploration.")
 
     certified_lemmas = []
@@ -145,11 +148,15 @@ def run_continuous(interval_sec: int = 15, max_cycles: int = None):
     cycles_completed = 0
     try:
         while True:
-            success = run_cycle()
-            cycles_completed += 1
-            if not success:
-                print("\n[!] Cycle encountered a blocking error. Pausing daemon.")
+            result = run_cycle()
+            if result == "FRONTIER_EXHAUSTED":
+                print("\n[OK] [Harness] Research frontier completed: all available theorems certified!")
                 break
+            elif not result:
+                print("\n[!] Cycle encountered a blocking error or rate limit. Pausing daemon.")
+                break
+
+            cycles_completed += 1
             if max_cycles and cycles_completed >= max_cycles:
                 print(f"\n[OK] Reached target max cycles ({max_cycles}). Stopping harness.")
                 break

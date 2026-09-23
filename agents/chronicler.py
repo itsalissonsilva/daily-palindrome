@@ -93,7 +93,7 @@ class Chronicler:
         verified_count = len(certified_lemmas)
         total_empirical_tested = sum(res.get("tested_count", 0) for res in empirical_results)
 
-        content = f"""# The Palindrome Continuum — Issue #{cycle_number:02d}
+        content = f"""# The Daily Palindrome — Issue #{cycle_number:02d}
 **Date:** {date_str}  
 **Theme:** {theme}  
 **Executive Status:** {verified_count} Theorems Formally Certified in Lean 4 | {total_empirical_tested:,} Empirical Configurations Tested  
