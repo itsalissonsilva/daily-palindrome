@@ -6,14 +6,39 @@ The system deliberately separates evidence from proof. A successful numerical se
 
 ## Architecture
 
-The pipeline is a short, gated research loop. Each stage receives a typed record from the stage before it; numerical evidence can stop a weak claim, while only Lean verification can certify one.
+### Responsibility topology
+
+The Research Manager owns the curriculum and coordinates four specialist roles. Their outputs converge in the Chronicler, which maintains the public research record.
+
+```mermaid
+flowchart TB
+    PM["Research Manager<br/>Curriculum DAG"]
+    EXP["Computationalist<br/>Empirical search"]
+    STRAT["Proof Strategist<br/>Decomposition"]
+    FORM["Formalizer<br/>Lean 4 kernel"]
+    CHRON["Chronicler<br/>Volumes, outlooks, and telemetry"]
+
+    PM --> EXP
+    PM --> STRAT
+    PM --> FORM
+    EXP --> CHRON
+    STRAT --> CHRON
+    FORM --> CHRON
+```
+
+### Gated research loop
+
+Each stage receives a typed record from the stage before it. Numerical evidence can stop a weak claim, while only Lean verification can certify one.
 
 ```mermaid
 flowchart LR
-    A[Curriculum] --> B[Counterexample search]
-    B --> C[Proof plan]
-    C --> D[Lean check]
-    D --> E[Published volume]
+    A[Validate curriculum] --> B[Select ready work]
+    B --> C[Empirical search]
+    C -->|survives| D[Proof plan]
+    C -->|counterexample| X[Stop and record]
+    D --> E[Lean verification]
+    E -->|certified| F[Publish volume]
+    E -->|incomplete| R[Review or retry]
 ```
 
 ### Components
