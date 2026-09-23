@@ -4,11 +4,20 @@ Autonomous empirical testing, pattern discovery, and counterexample search
 for palindromic number theory.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 import time
+
+
+def _validate_base(base: int) -> None:
+    if base < 2:
+        raise ValueError("base must be at least 2")
+
 
 def digits_in_base(n: int, b: int = 10) -> List[int]:
     """Returns digits of n in base b, least-significant first."""
+    _validate_base(b)
+    if n < 0:
+        raise ValueError("n must be non-negative")
     if n == 0:
         return [0]
     digits = []
@@ -17,6 +26,27 @@ def digits_in_base(n: int, b: int = 10) -> List[int]:
         digits.append(curr % b)
         curr //= b
     return digits
+
+
+def value_from_digits(digits: List[int], base: int = 10) -> int:
+    """Evaluate most-significant-first digits without string conversion."""
+    _validate_base(base)
+    value = 0
+    for digit in digits:
+        if digit < 0 or digit >= base:
+            raise ValueError(f"digit {digit} is invalid in base {base}")
+        value = value * base + digit
+    return value
+
+
+def palindrome_from_half(root: int, half_len: int, base: int, odd_length: bool) -> int:
+    """Mirror a fixed-width, most-significant-first half arithmetically."""
+    half = digits_in_base(root, base)[::-1]
+    if len(half) != half_len:
+        raise ValueError("root does not have the requested half length")
+    mirrored = half[-2::-1] if odd_length else half[::-1]
+    return value_from_digits(half + mirrored, base)
+
 
 def is_palindrome(n: int, b: int = 10) -> bool:
     """Returns True if n is a palindrome in base b."""
@@ -66,6 +96,9 @@ class Experimenter:
 
     def generate_palindromes(self, max_digits: int = 6, base: int = 10) -> List[int]:
         """Generates all base-b palindromes with up to max_digits length."""
+        _validate_base(base)
+        if max_digits < 1:
+            return []
         palindromes = []
         # Single digit
         for d in range(1, base):
@@ -78,14 +111,10 @@ class Experimenter:
             start = base ** (half_len - 1)
             end = base ** half_len
             is_odd = (length % 2 != 0)
-            
+
             for root in range(start, end):
-                s = str(root) if base == 10 else "".join(str(x) for x in digits_in_base(root, base)[::-1])
-                rev = s[:-1][::-1] if is_odd else s[::-1]
-                full_str = s + rev
-                pal_val = int(full_str, base)
-                palindromes.append(pal_val)
-        
+                palindromes.append(palindrome_from_half(root, half_len, base, is_odd))
+
         return sorted(list(set(palindromes)))
 
     def test_even_length_divisibility(self, base: int = 10, max_half_digits: int = 4) -> Dict[str, Any]:
@@ -93,7 +122,10 @@ class Experimenter:
         Tests the conjecture:
         Every even-length palindrome in base b is divisible by (b + 1).
         """
-        start_time = time.time()
+        _validate_base(base)
+        if max_half_digits < 1:
+            raise ValueError("max_half_digits must be at least 1")
+        start_time = time.perf_counter()
         divisor = base + 1
         tested_count = 0
         counterexamples = []
@@ -103,17 +135,15 @@ class Experimenter:
             start = base ** (half_len - 1)
             end = base ** half_len
             for root in range(start, end):
-                s = str(root)
-                full = s + s[::-1]
-                pal = int(full, base)
+                pal = palindrome_from_half(root, half_len, base, odd_length=False)
                 tested_count += 1
-                
-                if pal % divisor != 0:
-                    counterexamples.append({"n": pal, "length": len(full), "remainder": pal % divisor})
-                elif len(samples) < 5:
-                    samples.append({"n": pal, "length": len(full), "quotient": pal // divisor})
 
-        elapsed = time.time() - start_time
+                if pal % divisor != 0:
+                    counterexamples.append({"n": pal, "length": half_len * 2, "remainder": pal % divisor})
+                elif len(samples) < 5:
+                    samples.append({"n": pal, "length": half_len * 2, "quotient": pal // divisor})
+
+        elapsed = time.perf_counter() - start_time
         return {
             "hypothesis": f"Every even-length palindrome in base {base} is divisible by {divisor}",
             "tested_count": tested_count,
@@ -121,15 +151,19 @@ class Experimenter:
             "counterexamples": counterexamples[:5],
             "verified_empirically": len(counterexamples) == 0,
             "elapsed_seconds": round(elapsed, 4),
-            "samples": samples
+            "samples": samples,
+            "base": base,
         }
 
     def search_even_length_palindromic_primes(self, base: int = 10, max_half_digits: int = 4) -> Dict[str, Any]:
         """
-        Searches for even-length palindromic primes in base 10.
-        Known fact: 11 is the only one because 11 | n for all even-length palindromes.
+        Searches for even-length palindromic primes in base b.
+        Divisibility by b + 1 means the only possible result is b + 1 itself.
         """
-        start_time = time.time()
+        _validate_base(base)
+        if max_half_digits < 1:
+            raise ValueError("max_half_digits must be at least 1")
+        start_time = time.perf_counter()
         primes_found = []
         tested_count = 0
 
@@ -137,32 +171,33 @@ class Experimenter:
             start = base ** (half_len - 1)
             end = base ** half_len
             for root in range(start, end):
-                s = str(root)
-                full = s + s[::-1]
-                pal = int(full, base)
+                pal = palindrome_from_half(root, half_len, base, odd_length=False)
                 tested_count += 1
                 if is_prime(pal):
                     primes_found.append(pal)
 
-        elapsed = time.time() - start_time
+        elapsed = time.perf_counter() - start_time
+        expected = [base + 1] if is_prime(base + 1) else []
         return {
-            "hypothesis": f"In base {base}, 11 is the sole even-length palindromic prime",
+            "hypothesis": f"In base {base}, the only possible even-length palindromic prime is {base + 1}",
             "tested_count": tested_count,
             "primes_found": primes_found,
-            "verified_empirically": (primes_found == [11]),
-            "elapsed_seconds": round(elapsed, 4)
+            "counterexamples_found": 0 if primes_found == expected else 1,
+            "verified_empirically": primes_found == expected,
+            "elapsed_seconds": round(elapsed, 4),
+            "base": base,
         }
 
     def analyze_candidate(self, candidate_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Dispatcher for candidate hypotheses sent by PM."""
         task_type = payload.get("type")
         if task_type == "even_length_divisibility":
-            return self.test_even_length_divisibility(
+            result = self.test_even_length_divisibility(
                 base=payload.get("base", 10),
                 max_half_digits=payload.get("max_half_digits", 4)
             )
         elif task_type == "even_length_palindromic_primes":
-            return self.search_even_length_palindromic_primes(
+            result = self.search_even_length_palindromic_primes(
                 base=payload.get("base", 10),
                 max_half_digits=payload.get("max_half_digits", 4)
             )
@@ -172,6 +207,7 @@ class Experimenter:
                 for d in range(1, b):
                     tested += 1
             return {
+                "candidate_id": candidate_id,
                 "hypothesis": "All single-digit numbers (0 < d < b) are palindromic in base b",
                 "tested_count": tested,
                 "counterexamples_found": 0,
@@ -179,7 +215,9 @@ class Experimenter:
                 "elapsed_seconds": 0.0001
             }
         else:
-            return {"error": f"Unknown task type: {task_type}"}
+            return {"candidate_id": candidate_id, "error": f"Unknown task type: {task_type}"}
+        result["candidate_id"] = candidate_id
+        return result
 
 if __name__ == "__main__":
     exp = Experimenter()

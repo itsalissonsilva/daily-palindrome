@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Daily Palindrome</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-family='Georgia,serif' font-size='28' fill='%23fff'%3E11%3C/text%3E%3C/svg%3E">
   
   <!-- KaTeX for math rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -442,7 +443,7 @@
   <!-- Classic Header -->
   <header class="site-header">
     <h1 class="site-title"><a href="#home">The Daily Palindrome</a></h1>
-    <p class="site-description">An autonomous research web log on palindromic number theory and Lean 4 formalization.</p>
+    <p class="site-description">An autonomous research blog on palindromic number theory and Lean 4 formalization.</p>
     
     <!-- Nav Bar: Home About Archives Architecture -->
     <div class="nav-bar">
@@ -476,11 +477,11 @@
         <div class="widget-title">Research Agents</div>
         <p>Click any agent to inspect its role in the Architecture graph:</p>
         <ul style="list-style-type: disc; padding-left: 18px;">
-          <li><a href="#graph?agent=rm" class="agent-link">Research Manager</a> (Curriculum DAG)</li>
-          <li><a href="#graph?agent=comp" class="agent-link">Computationalist</a> (Empirical Search)</li>
-          <li><a href="#graph?agent=strat" class="agent-link">Proof Strategist</a> (Decomposition)</li>
-          <li><a href="#graph?agent=form" class="agent-link">Formalizer</a> (Lean 4 Kernel)</li>
-          <li><a href="#graph?agent=chron" class="agent-link">Chronicler</a> (Daily Synthesizer)</li>
+          <li><a href="#graph?agent=rm" class="agent-link">Research Manager</a><br>(Curriculum DAG)</li>
+          <li><a href="#graph?agent=comp" class="agent-link">Computationalist</a><br>(Empirical Search)</li>
+          <li><a href="#graph?agent=strat" class="agent-link">Proof Strategist</a><br>(Decomposition)</li>
+          <li><a href="#graph?agent=form" class="agent-link">Formalizer</a><br>(Lean 4 Kernel)</li>
+          <li><a href="#graph?agent=chron" class="agent-link">Chronicler</a><br>(Daily Synthesizer)</li>
         </ul>
       </div>
 
@@ -513,7 +514,7 @@
       <div class="widget">
         <div class="widget-title">Colophon</div>
         <p style="font-size: 11px; color: #777;">
-          Published continuously by autonomous agent cycles. Verified by Lean 4 with 0 <code>sorry</code> declarations.
+          Published continuously by autonomous agent cycles. Verified by Lean 4 with exact declaration certificates.
         </p>
       </div>
 
@@ -533,11 +534,53 @@
   let dispatches = [];
   let pmState = null;
   const POSTS_PER_PAGE = 3;
+  const ARTICLE_FILENAME = /^issue_\d+_\d{4}-\d{2}-\d{2}\.md$/;
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function normalizeArticleMarkdown(markdown) {
+    return markdown
+      .replace(/^\*\*Date:\*\*[^\n]*\n\*\*Theme:\*\*[^\n]*\n\*\*Executive Status:\*\*[^\n]*\n\s*---\s*\n+/m, '')
+      .replace(/^## 1\. Executive Abstract$/gm, '## 1. Main Findings');
+  }
+
+  function sanitizeHtml(html) {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    template.content.querySelectorAll('script, iframe, object, embed, form, input, button').forEach(el => el.remove());
+    template.content.querySelectorAll('*').forEach(el => {
+      [...el.attributes].forEach(attr => {
+        const name = attr.name.toLowerCase();
+        const value = attr.value.trim().toLowerCase();
+        if (
+          name.startsWith('on') || name === 'style' || name === 'srcdoc' ||
+          ((name === 'href' || name === 'src') && /^(javascript|vbscript|data):/.test(value))
+        ) {
+          el.removeAttribute(attr.name);
+        }
+      });
+    });
+    return template.innerHTML;
+  }
+
+  function renderMarkdown(markdown) {
+    return sanitizeHtml(marked.parse(normalizeArticleMarkdown(markdown)));
+  }
 
   async function initApp() {
     try {
       const res = await fetch('dispatches.json');
-      dispatches = await res.json();
+      const loadedDispatches = await res.json();
+      dispatches = Array.isArray(loadedDispatches)
+        ? loadedDispatches.filter(item => ARTICLE_FILENAME.test(item.filename || ''))
+        : [];
     } catch (e) {
       console.warn("Could not load dispatches.json");
     }
@@ -580,7 +623,8 @@
     if (hash.startsWith('#post/')) {
       const filename = hash.replace('#post/', '');
       updateNavHighlight('');
-      renderSinglePost(filename);
+      const entry = dispatches.find(item => item.filename === filename);
+      entry ? renderSinglePost(entry.filename) : renderUnknownPost();
     } else if (hash.startsWith('#about')) {
       updateNavHighlight('nav-about');
       renderAboutPage();
@@ -625,7 +669,7 @@
           let rawMd = await artRes.text();
           // Remove the first H1 from markdown so it is NOT duplicated with post-title
           rawMd = rawMd.replace(/^#\s+[^\n]+\n+/, '');
-          contentHtml = marked.parse(rawMd);
+          contentHtml = renderMarkdown(rawMd);
         }
       } catch (err) {
         contentHtml = `<p>Error loading article ${item.filename}</p>`;
@@ -634,9 +678,9 @@
       html += `
         <article class="post">
           <header class="post-header">
-            <h1 class="post-title"><a href="#post/${item.filename}">${item.title}</a></h1>
+            <h1 class="post-title"><a href="#post/${item.filename}">${escapeHtml(item.title)}</a></h1>
             <div class="post-meta">
-              Published on ${item.date} | Filed under: Number Theory, Palindromes | Status: Certified in Lean 4
+              Published on ${escapeHtml(item.date)} | Filed under: Number Theory, Palindromes
             </div>
           </header>
           <div class="entry-content">
@@ -683,7 +727,7 @@
       const postTitle = match ? match[1] : "The Daily Palindrome";
       let bodyMd = md.replace(/^#\s+[^\n]+\n+/, '');
 
-      const parsedHtml = marked.parse(bodyMd);
+      const parsedHtml = renderMarkdown(bodyMd);
 
       container.innerHTML = `
         <article class="post">
@@ -691,7 +735,7 @@
             <a href="#home" style="color: #000; text-decoration: underline;">&larr; Return to Front Page</a>
           </div>
           <header class="post-header">
-            <h1 class="post-title">${postTitle}</h1>
+            <h1 class="post-title">${escapeHtml(postTitle)}</h1>
           </header>
           <div class="entry-content">
             ${parsedHtml}
@@ -704,6 +748,10 @@
     }
   }
 
+  function renderUnknownPost() {
+    document.getElementById('main-view').innerHTML = '<p style="color: red;">Dispatch not found.</p>';
+  }
+
   /* ---------------- ARCHIVES PAGE: All Issues List ---------------- */
   function renderArchivesPage() {
     const container = document.getElementById('main-view');
@@ -713,9 +761,9 @@
       rowsHtml += `
         <tr>
           <td style="font-family: monospace; font-weight: bold;">Issue #${String(item.cycle).padStart(2, '0')}</td>
-          <td>${item.date}</td>
-          <td><a href="#post/${item.filename}" style="color: #000; text-decoration: underline; font-weight: bold;">${item.title}</a></td>
-          <td style="color: #2e7d32; font-family: monospace; font-weight: bold;">Certified</td>
+          <td>${escapeHtml(item.date)}</td>
+          <td><a href="#post/${item.filename}" style="color: #000; text-decoration: underline; font-weight: bold;">${escapeHtml(item.title)}</a></td>
+          <td style="font-family: monospace; font-weight: bold;">${escapeHtml(item.status || 'Research update')}</td>
           <td><a href="#post/${item.filename}" style="color: #000; text-decoration: underline;">Read &rarr;</a></td>
         </tr>
       `;
@@ -750,15 +798,15 @@
     const container = document.getElementById('main-view');
     container.innerHTML = `
       <article class="post">
-        <h1 class="post-title" style="color: var(--dark-orange);">About The Daily Palindrome & System Architecture</h1>
+        <h1 class="post-title" style="color: var(--dark-orange);">About The Daily Palindrome</h1>
         <p class="post-meta">Architecture Specification & Verification Philosophy</p>
         
         <div class="entry-content">
           <p>
-            <strong>The Daily Palindrome</strong> is an autonomous open-source research initiative designed to advance number theory without mathematical hallucination.
+            <strong>The Daily Palindrome</strong> is the publication of an open-source research collective studying palindromic number theory with machine-checked proofs.
           </p>
           <p>
-            Large Language Models are prone to algebraic errors and false proofs. To solve this, our suite implements a <strong>multi-agent dialectic</strong> where every proposed theorem is subjected to empirical counterexample searches and compiled directly through the <strong>Lean 4 proof kernel</strong>.
+            The staged pipeline combines empirical counterexample search, proof planning, and exact-declaration verification through the <strong>Lean 4 proof kernel</strong>.
           </p>
 
           <h2>Autonomous System Architecture Diagram</h2>
@@ -786,7 +834,7 @@
               <text x="380" y="42" class="txt-title">RESEARCH MANAGER (PI)</text>
               <text x="380" y="60" class="txt-sub">Curriculum DAG &amp; Priority Triage Engine</text>
 
-              <!-- Downward trunk -->
+              <!-- Fan-out to the three research stages -->
               <line x1="380" y1="75" x2="380" y2="120" class="arrow" />
               <line x1="120" y1="120" x2="640" y2="120" stroke="#111111" stroke-width="1.5" />
               <line x1="120" y1="120" x2="120" y2="150" class="arrow" />
@@ -827,8 +875,8 @@
             <li><strong>1. Research Manager:</strong> Prioritizes lemmas from Level 0 foundations to Level 4 Lychrel dynamical systems, preventing agents from getting trapped in unsolvable dead ends.</li>
             <li><strong>2. Computationalist:</strong> Tests conjectures across $10^5+$ integers and bases $b \in [2, 16]$ to identify counterexamples empirically within milliseconds.</li>
             <li><strong>3. Proof Strategist:</strong> Decomposes empirical hypotheses into algebraic invariants, parity symmetries, and modular digit expansions.</li>
-            <li><strong>4. Formalizer (Lean 4):</strong> Translates mathematical sketches into formal Lean 4 statements and verifies them with zero <code>sorry</code> holes.</li>
-            <li><strong>5. Scientific Chronicler:</strong> Compiles verified proofs into formatted daily articles and records an immutable JSONL telemetry ledger.</li>
+            <li><strong>4. Formalizer (Lean 4):</strong> Checks exact Lean 4 declarations and records their source hashes and axiom dependencies.</li>
+            <li><strong>5. Scientific Chronicler:</strong> Compiles verified proofs into formatted daily articles and records an append-only JSONL telemetry ledger.</li>
           </ul>
 
           <h2>Ground Truth via Lean 4</h2>
@@ -843,13 +891,16 @@
   /* ---------------- ARCHITECTURE & GRAPH PAGE: Visual Flowcharts & Proof DAG ---------------- */
   function renderGraphPage(highlightAgent = '') {
     const container = document.getElementById('main-view');
+    const frontier = new Map((pmState?.frontier || []).map(item => [item.id, item]));
+    const isCertified = id => ['CERTIFIED_PROVEN', 'VERIFIED_IN_LEAN'].includes(frontier.get(id)?.status);
+    const dagClass = (...ids) => ids.every(isCertified) ? 'dag-box-green' : 'dag-box-gray';
 
     const agents = [
       { id: 'rm', name: 'Research Manager', role: 'Curriculum DAG & Priority Engine', desc: 'Maintains the research frontier in pm_state.json. Scores low-hanging fruit, manages dependencies, and allocates compute.' },
-      { id: 'comp', name: 'Computationalist', role: 'Empirical Scanner & Counterexamples', desc: 'Runs fast SymPy and Miller-Rabin tests across thousands of integers in bases 2 through 16 to filter out false conjectures.' },
+      { id: 'comp', name: 'Computationalist', role: 'Empirical Scanner & Counterexamples', desc: 'Uses arithmetic digit generation and Miller-Rabin tests across bases 2 through 16 to filter out false conjectures.' },
       { id: 'strat', name: 'Proof Strategist', role: 'Mathematical Lemma Decomposer', desc: 'Deconstructs macro-claims into atomic parity and algebraic invariants (e.g. alternating digit sums modulo 11).' },
-      { id: 'form', name: 'Formalizer', role: 'Lean 4 Theorem Verifier', desc: 'Directly executes lake env lean. Guarantees 100% type safety and zero unclosed sorry declarations.' },
-      { id: 'chron', name: 'Scientific Chronicler', role: 'Daily Dispatch & Ledger Synthesizer', desc: 'Compiles the day\'s discoveries into The Daily Palindrome articles and maintains the JSONL audit ledger.' }
+      { id: 'form', name: 'Formalizer', role: 'Lean 4 Theorem Verifier', desc: 'Executes lake env lean and records an exact declaration check, source hash, and axiom report.' },
+      { id: 'chron', name: 'Scientific Chronicler', role: 'Daily Dispatch & Ledger Synthesizer', desc: 'Compiles each cycle\'s discoveries into The Daily Palindrome articles and maintains the JSONL audit ledger.' }
     ];
 
     let agentsHtml = '';
@@ -942,7 +993,7 @@
               </defs>
 
               <!-- Level 0: Foundations -->
-              <rect x="270" y="20" width="220" height="45" class="dag-box-green" />
+              <rect x="270" y="20" width="220" height="45" class="${dagClass('DEF-001')}" />
               <text x="280" y="38" class="dag-txt-id">[DEF-001] Axioms</text>
               <text x="280" y="52" class="dag-txt-desc">digits, IsPalindrome, IsPrime</text>
 
@@ -953,19 +1004,19 @@
               <line x1="380" y1="65" x2="660" y2="115" class="dag-edge" />
 
               <!-- Level 1: Lemmas -->
-              <rect x="20" y="115" width="160" height="50" class="dag-box-green" />
+              <rect x="20" y="115" width="160" height="50" class="${dagClass('LEMMA-000')}" />
               <text x="30" y="133" class="dag-txt-id">[LEMMA-000]</text>
               <text x="30" y="148" class="dag-txt-desc">Single-digit Palindromes</text>
 
-              <rect x="200" y="115" width="160" height="50" class="dag-box-green" />
+              <rect x="200" y="115" width="160" height="50" class="${dagClass('LEMMA-001')}" />
               <text x="210" y="133" class="dag-txt-id">[LEMMA-001]</text>
               <text x="210" y="148" class="dag-txt-desc">2-digit Div by 11</text>
 
-              <rect x="400" y="115" width="160" height="50" class="dag-box-green" />
+              <rect x="400" y="115" width="160" height="50" class="${dagClass('LEMMA-002', 'LEMMA-003')}" />
               <text x="410" y="133" class="dag-txt-id">[LEMMA-002..003]</text>
               <text x="410" y="148" class="dag-txt-desc">4 &amp; 6-digit Div by 11</text>
 
-              <rect x="580" y="115" width="160" height="50" class="dag-box-green" />
+              <rect x="580" y="115" width="160" height="50" class="${dagClass('LEMMA-004')}" />
               <text x="590" y="133" class="dag-txt-id">[LEMMA-004]</text>
               <text x="590" y="148" class="dag-txt-desc">Base-b Div by (b+1)</text>
 
@@ -973,7 +1024,7 @@
               <line x1="280" y1="165" x2="280" y2="215" class="dag-edge" />
 
               <!-- Level 1 Theorem: THM-001 -->
-              <rect x="200" y="215" width="160" height="50" class="dag-box-green" />
+              <rect x="200" y="215" width="160" height="50" class="${dagClass('THM-001')}" />
               <text x="210" y="233" class="dag-txt-id">[THM-001]</text>
               <text x="210" y="248" class="dag-txt-desc">11 Unique 2-digit Prime</text>
 
@@ -982,11 +1033,11 @@
               <line x1="480" y1="165" x2="480" y2="305" class="dag-edge" />
 
               <!-- Level 2/3 Conjectures (Queued) -->
-              <rect x="180" y="305" width="200" height="50" class="dag-box-gray" />
+              <rect x="180" y="305" width="200" height="50" class="${dagClass('CONJ-002')}" />
               <text x="190" y="323" class="dag-txt-id">[CONJ-002] Tier 2</text>
               <text x="190" y="338" class="dag-txt-desc">Carrieless Palindromic Squares</text>
 
-              <rect x="400" y="305" width="200" height="50" class="dag-box-gray" />
+              <rect x="400" y="305" width="200" height="50" class="${dagClass('CONJ-003')}" />
               <text x="410" y="323" class="dag-txt-id">[CONJ-003] Tier 3</text>
               <text x="410" y="338" class="dag-txt-desc">Additive 3-Palindrome Decomp</text>
             </svg>

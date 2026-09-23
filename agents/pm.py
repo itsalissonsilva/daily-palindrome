@@ -4,12 +4,60 @@ Maintains the Research Curriculum DAG, prioritizes low-hanging fruit,
 allocates verification tasks, and coordinates the daily research cycle.
 """
 
+import copy
 import json
 import os
+import tempfile
+from enum import Enum
 from typing import Dict, Any, List
 
+
+class ItemStatus(str, Enum):
+    """Persistent lifecycle states for a research candidate."""
+
+    QUEUED = "QUEUED"
+    QUEUED_DEFERRED = "QUEUED_DEFERRED"
+    IN_PROGRESS = "IN_PROGRESS"
+    CERTIFIED_PROVEN = "CERTIFIED_PROVEN"
+    VERIFIED_IN_LEAN = "VERIFIED_IN_LEAN"  # Accepted legacy value.
+    PARTIAL_SORRY = "PARTIAL_SORRY"  # Accepted legacy retryable value.
+    COUNTEREXAMPLE_FOUND = "COUNTEREXAMPLE_FOUND"
+    FAILED_RETRYABLE = "FAILED_RETRYABLE"
+    FAILED_PERMANENT = "FAILED_PERMANENT"
+    BLOCKED = "BLOCKED"
+
+
+PROVEN_STATUSES = {ItemStatus.CERTIFIED_PROVEN.value, ItemStatus.VERIFIED_IN_LEAN.value}
+ACTIONABLE_STATUSES = {ItemStatus.QUEUED.value}
+
+ALLOWED_TRANSITIONS = {
+    ItemStatus.QUEUED.value: {
+        ItemStatus.IN_PROGRESS.value,
+        ItemStatus.QUEUED_DEFERRED.value,
+        ItemStatus.BLOCKED.value,
+    },
+    ItemStatus.QUEUED_DEFERRED.value: {ItemStatus.QUEUED.value, ItemStatus.BLOCKED.value},
+    ItemStatus.IN_PROGRESS.value: {
+        ItemStatus.CERTIFIED_PROVEN.value,
+        ItemStatus.COUNTEREXAMPLE_FOUND.value,
+        ItemStatus.FAILED_RETRYABLE.value,
+        ItemStatus.FAILED_PERMANENT.value,
+        ItemStatus.PARTIAL_SORRY.value,
+        ItemStatus.BLOCKED.value,
+    },
+    ItemStatus.FAILED_RETRYABLE.value: {ItemStatus.QUEUED.value, ItemStatus.BLOCKED.value},
+    ItemStatus.PARTIAL_SORRY.value: {ItemStatus.QUEUED.value, ItemStatus.BLOCKED.value},
+    ItemStatus.BLOCKED.value: {ItemStatus.QUEUED.value, ItemStatus.QUEUED_DEFERRED.value},
+    ItemStatus.COUNTEREXAMPLE_FOUND.value: {ItemStatus.QUEUED.value},
+    ItemStatus.FAILED_PERMANENT.value: {ItemStatus.QUEUED.value},
+    ItemStatus.CERTIFIED_PROVEN.value: set(),
+    ItemStatus.VERIFIED_IN_LEAN.value: set(),
+}
+
+
 DEFAULT_CURRICULUM = {
-    "project_name": "Palindrome Continuum",
+    "schema_version": 1,
+    "project_name": "Research Collective",
     "theme": "Palindromic Number Theory",
     "current_cycle": 1,
     "frontier": [
@@ -20,6 +68,7 @@ DEFAULT_CURRICULUM = {
             "status": "QUEUED",
             "type": "definition",
             "module": "Common",
+            "declaration_name": "IsPalindrome",
             "dependencies": []
         },
         {
@@ -119,20 +168,104 @@ class ProjectManager:
         self.state = self.load_state()
 
     def load_state(self) -> Dict[str, Any]:
-        """Loads state from file or initializes default curriculum."""
-        if os.path.exists(self.state_file):
-            try:
-                with open(self.state_file, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception:
-                pass
-        return DEFAULT_CURRICULUM.copy()
+        """Load and validate state without silently discarding corrupt data."""
+        if not os.path.exists(self.state_file):
+            state = copy.deepcopy(DEFAULT_CURRICULUM)
+            self.validate_state(state)
+            return state
+
+        try:
+            with open(self.state_file, "r", encoding="utf-8") as f:
+                state = json.load(f)
+        except (OSError, json.JSONDecodeError) as exc:
+            raise RuntimeError(f"Unable to load research state {self.state_file}: {exc}") from exc
+
+        self._migrate_state(state)
+        self.validate_state(state)
+        return state
+
+    @staticmethod
+    def _migrate_state(state: Dict[str, Any]) -> None:
+        """Apply backward-compatible in-memory defaults for older state files."""
+        state.setdefault("schema_version", 1)
+        state.setdefault("daily_cycles", [])
+        state.setdefault("proven_knowledge_base", [])
+        for item in state.get("frontier", []):
+            item.setdefault("retry_count", 0)
+            if item.get("id") == "DEF-001":
+                item.setdefault("declaration_name", "IsPalindrome")
+
+    @staticmethod
+    def validate_state(state: Dict[str, Any]) -> None:
+        """Validate the state schema and prove that the dependency graph is a DAG."""
+        if not isinstance(state, dict) or not isinstance(state.get("frontier"), list):
+            raise ValueError("Research state must contain a frontier list")
+
+        frontier = state["frontier"]
+        ids = [item.get("id") for item in frontier]
+        if any(not isinstance(item_id, str) or not item_id for item_id in ids):
+            raise ValueError("Every frontier item must have a non-empty string id")
+        if len(ids) != len(set(ids)):
+            raise ValueError("Frontier item ids must be unique")
+
+        known_ids = set(ids)
+        valid_statuses = {status.value for status in ItemStatus}
+        proven_ids = state.get("proven_knowledge_base", [])
+        if not isinstance(proven_ids, list) or len(proven_ids) != len(set(proven_ids)):
+            raise ValueError("proven_knowledge_base must be a list of unique ids")
+        if set(proven_ids) - known_ids:
+            raise ValueError("proven_knowledge_base contains unknown frontier ids")
+        graph: Dict[str, List[str]] = {}
+        for item in frontier:
+            status = item.get("status")
+            if status not in valid_statuses:
+                raise ValueError(f"Unknown status {status!r} for {item['id']}")
+            dependencies = item.get("dependencies", [])
+            if not isinstance(dependencies, list):
+                raise ValueError(f"Dependencies for {item['id']} must be a list")
+            missing = set(dependencies) - known_ids
+            if missing:
+                raise ValueError(f"Unknown dependencies for {item['id']}: {sorted(missing)}")
+            if item["id"] in proven_ids and status not in PROVEN_STATUSES:
+                raise ValueError(f"Proven item {item['id']} has non-proven status {status}")
+            graph[item["id"]] = dependencies
+
+        visiting = set()
+        visited = set()
+
+        def visit(item_id: str) -> None:
+            if item_id in visiting:
+                raise ValueError(f"Dependency cycle detected at {item_id}")
+            if item_id in visited:
+                return
+            visiting.add(item_id)
+            for dependency in graph[item_id]:
+                visit(dependency)
+            visiting.remove(item_id)
+            visited.add(item_id)
+
+        for item_id in ids:
+            visit(item_id)
 
     def save_state(self):
-        """Persists current state to JSON."""
-        os.makedirs(os.path.dirname(os.path.abspath(self.state_file)), exist_ok=True)
-        with open(self.state_file, "w", encoding="utf-8") as f:
-            json.dump(self.state, f, indent=2)
+        """Persist validated state atomically so interruption cannot truncate it."""
+        self.validate_state(self.state)
+        state_dir = os.path.dirname(os.path.abspath(self.state_file))
+        os.makedirs(state_dir, exist_ok=True)
+        temp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                "w", encoding="utf-8", dir=state_dir, delete=False, suffix=".tmp"
+            ) as temp_file:
+                temp_path = temp_file.name
+                json.dump(self.state, temp_file, indent=2)
+                temp_file.write("\n")
+                temp_file.flush()
+                os.fsync(temp_file.fileno())
+            os.replace(temp_path, self.state_file)
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.unlink(temp_path)
 
     def get_low_hanging_fruit(self) -> List[Dict[str, Any]]:
         """
@@ -143,8 +276,8 @@ class ProjectManager:
         ready_items = []
 
         for item in self.state["frontier"]:
-            # Skip already certified items
-            if item["status"] in ("CERTIFIED_PROVEN", "VERIFIED_IN_LEAN", "BLOCKED"):
+            # Deferred, failed, and blocked work must be activated explicitly.
+            if item["status"] not in ACTIONABLE_STATUSES:
                 continue
             
             # Check dependencies
@@ -159,16 +292,40 @@ class ProjectManager:
         return ready_items
 
     def mark_item(self, item_id: str, new_status: str, telemetry: Dict[str, Any] = None):
-        """Updates item status and registers it in proven knowledge base if verified."""
+        """Apply a validated lifecycle transition and persist its telemetry."""
+        if new_status not in {status.value for status in ItemStatus}:
+            raise ValueError(f"Unknown item status: {new_status}")
+
+        item = self.get_item(item_id)
+        old_status = item["status"]
+        if new_status != old_status and new_status not in ALLOWED_TRANSITIONS.get(old_status, set()):
+            raise ValueError(f"Invalid status transition for {item_id}: {old_status} -> {new_status}")
+
+        item["status"] = new_status
+        if telemetry is not None:
+            item["last_telemetry"] = telemetry
+        if new_status == ItemStatus.FAILED_RETRYABLE.value:
+            item["retry_count"] = item.get("retry_count", 0) + 1
+        if new_status in PROVEN_STATUSES and item_id not in self.state["proven_knowledge_base"]:
+            self.state["proven_knowledge_base"].append(item_id)
+        self.save_state()
+
+    def get_item(self, item_id: str) -> Dict[str, Any]:
         for item in self.state["frontier"]:
             if item["id"] == item_id:
-                item["status"] = new_status
-                if telemetry:
-                    item["last_telemetry"] = telemetry
-                if new_status in ("CERTIFIED_PROVEN", "VERIFIED_IN_LEAN"):
-                    if item_id not in self.state["proven_knowledge_base"]:
-                        self.state["proven_knowledge_base"].append(item_id)
-                break
+                return item
+        raise KeyError(f"Unknown frontier item: {item_id}")
+
+    def activate_item(self, item_id: str) -> None:
+        """Move deferred or blocked work into the actionable queue."""
+        self.mark_item(item_id, ItemStatus.QUEUED.value)
+
+    def retry_item(self, item_id: str) -> None:
+        """Explicitly requeue a failed item."""
+        self.mark_item(item_id, ItemStatus.QUEUED.value)
+
+    def record_cycle(self, record: Dict[str, Any]) -> None:
+        self.state.setdefault("daily_cycles", []).append(record)
         self.save_state()
 
     def increment_cycle(self):

@@ -1,0 +1,8 @@
+[project]
+name = "palindrome-research-collective"
+version = "0.2.0"
+description = "A Lean-backed palindromic number theory research pipeline"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

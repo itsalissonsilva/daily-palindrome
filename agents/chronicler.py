@@ -6,8 +6,9 @@ logs detailed telemetry to an auditable JSONL ledger, and maintains the blog web
 
 import json
 import os
-import shutil
-from datetime import datetime
+import re
+import tempfile
+from datetime import datetime, timezone
 from typing import Dict, Any, List
 
 class Chronicler:
@@ -23,14 +24,46 @@ class Chronicler:
         os.makedirs(self.site_articles_dir, exist_ok=True)
         os.makedirs(os.path.dirname(os.path.abspath(self.log_file)), exist_ok=True)
 
-    def log_event(self, event_type: str, agent_name: str, payload: Dict[str, Any]):
+    @staticmethod
+    def _atomic_write_text(path: str, content: str) -> None:
+        """Write a UTF-8 file atomically in its destination directory."""
+        directory = os.path.dirname(os.path.abspath(path))
+        os.makedirs(directory, exist_ok=True)
+        temp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                "w", encoding="utf-8", dir=directory, delete=False, suffix=".tmp"
+            ) as temp_file:
+                temp_path = temp_file.name
+                temp_file.write(content)
+                temp_file.flush()
+                os.fsync(temp_file.fileno())
+            os.replace(temp_path, path)
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.unlink(temp_path)
+
+    @classmethod
+    def _atomic_copy(cls, source: str, destination: str) -> None:
+        with open(source, "r", encoding="utf-8") as source_file:
+            cls._atomic_write_text(destination, source_file.read())
+
+    def log_event(
+        self,
+        event_type: str,
+        agent_name: str,
+        payload: Dict[str, Any],
+        run_id: str = None,
+    ):
         """Appends an event to the JSONL research log."""
         record = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "event_type": event_type,
             "agent": agent_name,
             "data": payload
         }
+        if run_id:
+            record["run_id"] = run_id
         with open(self.log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(record) + "\n")
 
@@ -39,47 +72,85 @@ class Chronicler:
         entries = []
         if os.path.exists(self.dispatches_dir):
             for fname in sorted(os.listdir(self.dispatches_dir)):
-                if fname.endswith(".md") and fname.startswith("issue_"):
+                match = re.fullmatch(r"issue_(\d+)_(\d{4}-\d{2}-\d{2})\.md", fname)
+                if match:
                     src = os.path.join(self.dispatches_dir, fname)
                     dst = os.path.join(self.site_articles_dir, fname)
-                    # Mirror to site/articles
-                    try:
-                        shutil.copy2(src, dst)
-                    except Exception:
-                        pass
+                    self._atomic_copy(src, dst)
 
                     # Parse header info
-                    cycle_num = 0
-                    date_val = ""
-                    try:
-                        parts = fname.replace(".md", "").split("_")
-                        if len(parts) >= 2:
-                            cycle_num = int(parts[1])
-                        if len(parts) >= 3:
-                            date_val = parts[2]
-                    except Exception:
-                        pass
+                    cycle_num = int(match.group(1))
+                    date_val = match.group(2)
+
+                    with open(src, "r", encoding="utf-8") as article_file:
+                        article_text = article_file.read()
+                    verified_count = article_text.count("**`CERTIFIED_PROVEN`**")
 
                     entries.append({
                         "cycle": cycle_num,
                         "filename": fname,
                         "date": date_val or datetime.now().strftime("%Y-%m-%d"),
                         "title": f"The Daily Palindrome — Issue #{cycle_num:02d}",
-                        "url": f"articles/{fname}"
+                        "url": f"articles/{fname}",
+                        "verified_lemmas": verified_count,
+                        "status": "Certified" if verified_count else "Research update",
                     })
 
         entries.sort(key=lambda x: x["cycle"], reverse=True)
         index_file = os.path.join(self.site_dir, "dispatches.json")
-        with open(index_file, "w", encoding="utf-8") as f:
-            json.dump(entries, f, indent=2)
+        self._atomic_write_text(index_file, json.dumps(entries, indent=2) + "\n")
 
         # Mirror pm_state.json for graph visualization
         state_src = os.path.join(os.path.dirname(self.dispatches_dir), "pm_state.json")
         if os.path.exists(state_src):
-            try:
-                shutil.copy2(state_src, os.path.join(self.site_dir, "pm_state.json"))
-            except Exception:
-                pass
+            self._atomic_copy(state_src, os.path.join(self.site_dir, "pm_state.json"))
+
+    def _build_abstract(
+        self,
+        theme: str,
+        certified_lemmas: List[Dict[str, Any]],
+        empirical_results: List[Dict[str, Any]],
+        open_conjectures: List[Dict[str, Any]],
+    ) -> str:
+        """Generate a concise, data-driven abstract that varies per cycle."""
+        parts: List[str] = []
+
+        # Rotate the opening shape so consecutive reports do not read like a template.
+        lemma_titles = [l.get("title", "") for l in certified_lemmas]
+        if certified_lemmas:
+            names = ", ".join(f"**{t}**" for t in lemma_titles[:3])
+            parts.append(
+                f"Lean 4 closed {len(certified_lemmas)} proof obligation"
+                f"{'s' if len(certified_lemmas) != 1 else ''} on the **{theme}** frontier: {names}."
+            )
+        else:
+            parts.append(
+                f"Work on the **{theme}** frontier concentrated on empirical reconnaissance "
+                f"and proof decomposition; no new declaration reached certification."
+            )
+
+        # Empirical summary
+        total_tested = sum(r.get("tested_count", 0) for r in empirical_results)
+        total_cx = sum(r.get("counterexamples_found", 0) for r in empirical_results)
+        if empirical_results:
+            hypo_names = [r.get("hypothesis", "unnamed") for r in empirical_results]
+            parts.append(
+                f"The empirical pass scanned **{total_tested:,}** configurations "
+                f"across {len(empirical_results)} hypothesis test{'s' if len(empirical_results) != 1 else ''} "
+                f"(*{', '.join(hypo_names[:2])}*"
+                + (f", ..." if len(hypo_names) > 2 else "")
+                + f"), finding **{total_cx}** counterexample{'s' if total_cx != 1 else ''}."
+            )
+
+        # Frontier outlook
+        if open_conjectures:
+            next_ids = [c.get("id", "?") for c in open_conjectures[:3]]
+            parts.append(
+                f"The frontier currently tracks {len(open_conjectures)} incomplete conjecture{'s' if len(open_conjectures) != 1 else ''} "
+                f"(`{'`, `'.join(next_ids)}`), including deferred and retry-required work."
+            )
+
+        return " ".join(parts)
 
     def publish_daily_article(
         self,
@@ -99,35 +170,39 @@ class Chronicler:
         filepath = os.path.join(self.dispatches_dir, filename)
 
         verified_count = len(certified_lemmas)
-        total_empirical_tested = sum(res.get("tested_count", 0) for res in empirical_results)
+
+        # Build dynamic abstract from cycle data
+        abstract = self._build_abstract(theme, certified_lemmas, empirical_results, open_conjectures)
 
         content = f"""# The Daily Palindrome — Issue #{cycle_number:02d}
-**Date:** {date_str}  
-**Theme:** {theme}  
-**Executive Status:** {verified_count} Theorems Formally Certified in Lean 4 | {total_empirical_tested:,} Empirical Configurations Tested  
 
----
+## 1. Main Findings
 
-## 1. Executive Abstract
-
-Today, the **Palindrome Continuum** research collective investigated foundational invariants of palindromic integers. By coupling empirical pattern searching with automated theorem proving in **Lean 4**, the suite established that **even-length palindromes in base 10 possess a rigid parity obstruction** that enforces divisibility by 11. Consequently, 11 is formally certified as the *sole* even-length palindromic prime in base 10.
+{abstract}
 
 ---
 
 ## 2. Formally Certified Theorems (Lean 4)
-
-All theorems below compiled with **0 errors and 0 unclosed goals (`sorry`)** in the Lean 4 kernel:
-
-```lean
-{lead_theorem_code.strip()}
-```
+"""
+        if certified_lemmas:
+            content += """
+Each declaration below passed an exact-name Lean check and an axiom report containing only the configured trusted axioms.
 
 ### Verified Lemma Summary
 | Lemma ID | Description | Lean Module | Status |
 | :--- | :--- | :--- | :--- |
 """
-        for item in certified_lemmas:
-            content += f"| `{item.get('id', 'N/A')}` | {item.get('title', 'N/A')} | `{item.get('module', 'N/A')}` | **`CERTIFIED_PROVEN`** |\n"
+            for item in certified_lemmas:
+                content += f"| `{item.get('id', 'N/A')}` | {item.get('title', 'N/A')} | `{item.get('module', 'N/A')}` | **`CERTIFIED_PROVEN`** |\n"
+            if lead_theorem_code.strip():
+                content += f"""
+
+```lean
+{lead_theorem_code.strip()}
+```
+"""
+        else:
+            content += "\nNo new Lean declaration was certified in this cycle.\n"
 
         content += f"""
 
@@ -144,7 +219,8 @@ The **Computationalist** agent executed exhaustive searches to stress-test candi
             elapsed = res.get("elapsed_seconds", 0)
             primes = res.get("primes_found", [])
             content += f"### Hypothesis: *\"{hypo}\"*\n"
-            content += f"* **Search Space**: {tested:,} integers scanned across base 10.\n"
+            noun = "integer" if tested == 1 else "integers"
+            content += f"* **Search Space**: {tested:,} {noun} scanned in base {res.get('base', 10)}.\n"
             content += f"* **Counterexamples Discovered**: {res.get('counterexamples_found', 0)}\n"
             content += f"* **Elapsed Compute**: {elapsed}s\n"
             if primes:
@@ -155,24 +231,28 @@ The **Computationalist** agent executed exhaustive searches to stress-test candi
 
 ## 4. Active Research Frontier & Open Conjectures
 
-The **Research Manager** has queued the following higher-tier hypotheses for the upcoming cycles:
+The **Research Manager** tracks the following incomplete hypotheses and their current lifecycle states:
 
 """
         for conj in open_conjectures:
+            display_status = {
+                "PARTIAL_SORRY": "INCOMPLETE",
+                "FAILED_RETRYABLE": "RETRY_REQUIRED",
+                "FAILED_PERMANENT": "REVIEW_REQUIRED",
+            }.get(conj.get("status"), conj.get("status"))
             content += f"* **`{conj.get('id')}`** [Tier {conj.get('tier')}]: {conj.get('title')}\n"
             content += f"  * *Prerequisites*: `{', '.join(conj.get('dependencies', []))}`\n"
-            content += f"  * *Status*: `{conj.get('status')}`\n"
+            content += f"  * *Status*: `{display_status}`\n"
 
         content += f"""
 
 ---
 
-*Authored autonomously by the Palindrome Continuum Collective.*  
+*Authored autonomously by the research collective.*
 *Verification Kernel: Lean 4.34.0 | Language: Lean 4 / Python 3.14*
 """
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
+        self._atomic_write_text(filepath, content)
 
         # Mirror to site/articles and update site/dispatches.json
         self.sync_site_index()
