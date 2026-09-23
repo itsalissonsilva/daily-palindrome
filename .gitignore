@@ -6,5 +6,5 @@ __pycache__/
 htmlcov/
 formal/.lake/
 dist/
-.openai/deploy/
+.openai/
 *.tar.gz
