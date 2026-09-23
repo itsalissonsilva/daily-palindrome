@@ -1,47 +1,74 @@
 [
   {
+    "kind": "volume",
     "cycle": 5,
-    "filename": "issue_05_2026-09-22.md",
+    "volume": 5,
+    "label": "Vol. 05",
+    "status": "Research update",
+    "filename": "volume_05_2026-09-22.md",
     "date": "2026-09-22",
-    "title": "The Daily Palindrome \u2014 Issue #05",
-    "url": "articles/issue_05_2026-09-22.md",
-    "verified_lemmas": 0,
-    "status": "Research update"
+    "title": "The Daily Palindrome \u2014 Vol. 05",
+    "url": "articles/volume_05_2026-09-22.md",
+    "verified_lemmas": 0
   },
   {
+    "kind": "volume",
     "cycle": 4,
-    "filename": "issue_04_2026-09-22.md",
+    "volume": 4,
+    "label": "Vol. 04",
+    "status": "Certified",
+    "filename": "volume_04_2026-09-22.md",
     "date": "2026-09-22",
-    "title": "The Daily Palindrome \u2014 Issue #04",
-    "url": "articles/issue_04_2026-09-22.md",
-    "verified_lemmas": 1,
-    "status": "Certified"
+    "title": "The Daily Palindrome \u2014 Vol. 04",
+    "url": "articles/volume_04_2026-09-22.md",
+    "verified_lemmas": 1
   },
   {
+    "kind": "volume",
     "cycle": 3,
-    "filename": "issue_03_2026-09-22.md",
+    "volume": 3,
+    "label": "Vol. 03",
+    "status": "Certified",
+    "filename": "volume_03_2026-09-22.md",
     "date": "2026-09-22",
-    "title": "The Daily Palindrome \u2014 Issue #03",
-    "url": "articles/issue_03_2026-09-22.md",
-    "verified_lemmas": 4,
-    "status": "Certified"
+    "title": "The Daily Palindrome \u2014 Vol. 03",
+    "url": "articles/volume_03_2026-09-22.md",
+    "verified_lemmas": 4
   },
   {
+    "kind": "volume",
     "cycle": 2,
-    "filename": "issue_02_2026-09-22.md",
+    "volume": 2,
+    "label": "Vol. 02",
+    "status": "Certified",
+    "filename": "volume_02_2026-09-22.md",
     "date": "2026-09-22",
-    "title": "The Daily Palindrome \u2014 Issue #02",
-    "url": "articles/issue_02_2026-09-22.md",
-    "verified_lemmas": 1,
-    "status": "Certified"
+    "title": "The Daily Palindrome \u2014 Vol. 02",
+    "url": "articles/volume_02_2026-09-22.md",
+    "verified_lemmas": 1
   },
   {
+    "kind": "volume",
     "cycle": 1,
-    "filename": "issue_01_2026-09-22.md",
+    "volume": 1,
+    "label": "Vol. 01",
+    "status": "Certified",
+    "filename": "volume_01_2026-09-22.md",
     "date": "2026-09-22",
-    "title": "The Daily Palindrome \u2014 Issue #01",
-    "url": "articles/issue_01_2026-09-22.md",
-    "verified_lemmas": 1,
-    "status": "Certified"
+    "title": "The Daily Palindrome \u2014 Vol. 01",
+    "url": "articles/volume_01_2026-09-22.md",
+    "verified_lemmas": 1
+  },
+  {
+    "kind": "launch",
+    "cycle": null,
+    "volume": null,
+    "label": "Launch",
+    "status": "Roadmap",
+    "filename": "launch_2026-09-21.md",
+    "date": "2026-09-21",
+    "title": "Launch",
+    "url": "articles/launch_2026-09-21.md",
+    "verified_lemmas": 0
   }
 ]

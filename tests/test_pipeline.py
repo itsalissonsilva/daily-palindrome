@@ -55,6 +55,20 @@ class ProjectManagerTests(unittest.TestCase):
             saved = json.load(state_file)
         self.assertEqual(saved["schema_version"], 1)
 
+    def test_weekly_outlook_summarizes_advancements_and_priorities(self):
+        state = copy.deepcopy(DEFAULT_CURRICULUM)
+        state["frontier"][0]["status"] = ItemStatus.CERTIFIED_PROVEN.value
+        state["proven_knowledge_base"] = ["DEF-001"]
+        state["frontier"][1]["status"] = ItemStatus.FAILED_RETRYABLE.value
+        self.manager.state = state
+
+        outlook = self.manager.build_weekly_outlook()
+
+        self.assertEqual(outlook["proven_count"], 1)
+        self.assertEqual(outlook["advancements"][0]["id"], "DEF-001")
+        self.assertEqual(outlook["priorities"][0]["id"], "LEMMA-001")
+        self.assertIn("FAILED_RETRYABLE", outlook["status_counts"])
+
 
 class StrategyTests(unittest.TestCase):
     def test_strategy_identifies_exact_configured_target(self):

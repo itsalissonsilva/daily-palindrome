@@ -16,7 +16,7 @@ flowchart TB
     EXP["Computationalist<br/>Empirical search"]
     STRAT["Proof Strategist<br/>Decomposition"]
     FORM["Formalizer<br/>Lean 4 kernel"]
-    CHRON["Chronicler<br/>Dispatches and telemetry"]
+    CHRON["Chronicler<br/>Volumes, outlooks, and telemetry"]
 
     PM --> EXP
     PM --> STRAT
@@ -50,7 +50,7 @@ flowchart LR
 | `agents/experimenter.py` | Constructs palindromes arithmetically in bases 2–16 and searches for counterexamples | Empirical result records |
 | `agents/strategist.py` | Maps a candidate to a proof strategy and an exact Lean module/declaration target | Typed proof plan |
 | `agents/formalizer.py` | Builds the Lean project, checks the named declaration, audits its axiom report, and emits a certificate | Verification certificate |
-| `agents/chronicler.py` | Writes Markdown dispatches, JSONL telemetry, and the static-blog indexes | `dispatches/`, `logs/`, and `site/` data |
+| `agents/chronicler.py` | Writes numbered volumes, Sunday outlooks, JSONL telemetry, and the static-blog indexes | `dispatches/`, `logs/`, and `site/` data |
 | `formal/` | Contains the Lean definitions and theorems | Compiled Lean modules |
 | `site/` | Serves the public blog, archives, About page, and architecture views | Static website |
 
@@ -106,8 +106,11 @@ flowchart LR
     STATE[pm_state.json] --> PM[Research cycle]
     LEAN[formal/Continuum/*.lean] --> PM
     PM --> LOG[logs/research_log.jsonl]
-    PM --> MD[dispatches/issue_*.md]
+    PM --> MD[dispatches/volume_*.md]
+    PM --> WEEKLY[Sunday weekly outlook]
+    ROADMAP[Launch roadmap] --> SYNC
     MD --> SYNC[Chronicler sync]
+    WEEKLY --> SYNC
     STATE --> SYNC
     SYNC --> ARTICLES[site/articles/*.md]
     SYNC --> INDEX[site/dispatches.json]
@@ -156,6 +159,9 @@ python -B main.py --run-cycle
 
 # Recheck every declaration in the proven knowledge base
 python -B main.py --audit-certificates
+
+# Publish the Research Manager's Weekly Research Outlook manually
+python -B main.py --weekly-outlook
 
 # Explicitly activate deferred/blocked work or retry a failed item
 python -B main.py --activate CONJ-002

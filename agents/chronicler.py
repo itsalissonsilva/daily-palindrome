@@ -1,6 +1,6 @@
 """
 Scientific Chronicler Agent (The Author / Publisher)
-Synthesizes the results of research cycles into publication-ready Daily Articles,
+Synthesizes research cycles into numbered volumes and weekly outlooks,
 logs detailed telemetry to an auditable JSONL ledger, and maintains the blog website index.
 """
 
@@ -68,35 +68,89 @@ class Chronicler:
             f.write(json.dumps(record) + "\n")
 
     def sync_site_index(self):
-        """Scans dispatches_dir and updates site/dispatches.json for the web blog."""
+        """Build the public index for launch, volume, and weekly-outlook posts."""
         entries = []
+        managed_files = set()
+        volume_pattern = re.compile(r"volume_(\d+)_(\d{4}-\d{2}-\d{2})\.md")
+        launch_pattern = re.compile(r"launch_(\d{4}-\d{2}-\d{2})\.md")
+        outlook_pattern = re.compile(r"weekly_outlook_(\d{4}-\d{2}-\d{2})\.md")
+        managed_pattern = re.compile(
+            r"(?:issue|volume)_\d+_\d{4}-\d{2}-\d{2}\.md|"
+            r"launch_\d{4}-\d{2}-\d{2}\.md|"
+            r"weekly_outlook_\d{4}-\d{2}-\d{2}\.md"
+        )
+
         if os.path.exists(self.dispatches_dir):
             for fname in sorted(os.listdir(self.dispatches_dir)):
-                match = re.fullmatch(r"issue_(\d+)_(\d{4}-\d{2}-\d{2})\.md", fname)
-                if match:
-                    src = os.path.join(self.dispatches_dir, fname)
-                    dst = os.path.join(self.site_articles_dir, fname)
-                    self._atomic_copy(src, dst)
+                volume_match = volume_pattern.fullmatch(fname)
+                launch_match = launch_pattern.fullmatch(fname)
+                outlook_match = outlook_pattern.fullmatch(fname)
+                if not (volume_match or launch_match or outlook_match):
+                    continue
 
-                    # Parse header info
-                    cycle_num = int(match.group(1))
-                    date_val = match.group(2)
+                src = os.path.join(self.dispatches_dir, fname)
+                dst = os.path.join(self.site_articles_dir, fname)
+                self._atomic_copy(src, dst)
+                managed_files.add(fname)
 
-                    with open(src, "r", encoding="utf-8") as article_file:
-                        article_text = article_file.read()
-                    verified_count = article_text.count("**`CERTIFIED_PROVEN`**")
+                with open(src, "r", encoding="utf-8") as article_file:
+                    article_text = article_file.read()
+                title_match = re.search(r"^#\s+(.+)$", article_text, re.MULTILINE)
+                title = title_match.group(1).strip() if title_match else "The Daily Palindrome"
+                verified_count = article_text.count("**`CERTIFIED_PROVEN`**")
 
-                    entries.append({
-                        "cycle": cycle_num,
-                        "filename": fname,
-                        "date": date_val or datetime.now().strftime("%Y-%m-%d"),
-                        "title": f"The Daily Palindrome — Issue #{cycle_num:02d}",
-                        "url": f"articles/{fname}",
-                        "verified_lemmas": verified_count,
+                if volume_match:
+                    volume_num = int(volume_match.group(1))
+                    date_val = volume_match.group(2)
+                    entry = {
+                        "kind": "volume",
+                        "cycle": volume_num,
+                        "volume": volume_num,
+                        "label": f"Vol. {volume_num:02d}",
                         "status": "Certified" if verified_count else "Research update",
-                    })
+                    }
+                elif outlook_match:
+                    date_val = outlook_match.group(1)
+                    entry = {
+                        "kind": "weekly_outlook",
+                        "cycle": None,
+                        "volume": None,
+                        "label": "Weekly Outlook",
+                        "status": "Planning",
+                    }
+                else:
+                    date_val = launch_match.group(1)
+                    entry = {
+                        "kind": "launch",
+                        "cycle": None,
+                        "volume": None,
+                        "label": "Launch",
+                        "status": "Roadmap",
+                    }
 
-        entries.sort(key=lambda x: x["cycle"], reverse=True)
+                entry.update({
+                    "filename": fname,
+                    "date": date_val,
+                    "title": title,
+                    "url": f"articles/{fname}",
+                    "verified_lemmas": verified_count,
+                })
+                entries.append(entry)
+
+        # Remove obsolete generated article copies while preserving unrelated files.
+        for fname in os.listdir(self.site_articles_dir):
+            if managed_pattern.fullmatch(fname) and fname not in managed_files:
+                os.unlink(os.path.join(self.site_articles_dir, fname))
+
+        kind_priority = {"weekly_outlook": 2, "volume": 1, "launch": 0}
+        entries.sort(
+            key=lambda item: (
+                item["date"],
+                kind_priority[item["kind"]],
+                item.get("volume") or -1,
+            ),
+            reverse=True,
+        )
         index_file = os.path.join(self.site_dir, "dispatches.json")
         self._atomic_write_text(index_file, json.dumps(entries, indent=2) + "\n")
 
@@ -162,11 +216,11 @@ class Chronicler:
         lead_theorem_code: str
     ) -> str:
         """
-        Renders a publication-ready Daily Article in GitHub Flavored Markdown
+        Renders a publication-ready research volume in GitHub Flavored Markdown
         ready for publishing to the website / documentation portal.
         """
         date_str = datetime.now().strftime("%Y-%m-%d")
-        filename = f"issue_{cycle_number:02d}_{date_str}.md"
+        filename = f"volume_{cycle_number:02d}_{date_str}.md"
         filepath = os.path.join(self.dispatches_dir, filename)
 
         verified_count = len(certified_lemmas)
@@ -174,7 +228,7 @@ class Chronicler:
         # Build dynamic abstract from cycle data
         abstract = self._build_abstract(theme, certified_lemmas, empirical_results, open_conjectures)
 
-        content = f"""# The Daily Palindrome — Issue #{cycle_number:02d}
+        content = f"""# The Daily Palindrome — Vol. {cycle_number:02d}
 
 ## 1. Main Findings
 
@@ -257,10 +311,84 @@ The **Research Manager** tracks the following incomplete hypotheses and their cu
         # Mirror to site/articles and update site/dispatches.json
         self.sync_site_index()
 
-        self.log_event("DAILY_ARTICLE_PUBLISHED", "Chronicler", {
+        self.log_event("RESEARCH_VOLUME_PUBLISHED", "Chronicler", {
             "cycle": cycle_number,
             "file": filename,
             "verified_lemmas": verified_count
         })
 
+        return filepath
+
+    def publish_weekly_outlook(
+        self,
+        outlook: Dict[str, Any],
+        publication_date: str = None,
+    ) -> str:
+        """Publish the Research Manager's weekly status review and forward plan."""
+        date_str = publication_date or datetime.now().strftime("%Y-%m-%d")
+        filename = f"weekly_outlook_{date_str}.md"
+        filepath = os.path.join(self.dispatches_dir, filename)
+
+        status_names = {
+            "CERTIFIED_PROVEN": "Certified",
+            "VERIFIED_IN_LEAN": "Certified",
+            "QUEUED": "Queued",
+            "QUEUED_DEFERRED": "Deferred",
+            "IN_PROGRESS": "In progress",
+            "PARTIAL_SORRY": "Incomplete",
+            "COUNTEREXAMPLE_FOUND": "Counterexample found",
+            "FAILED_RETRYABLE": "Retry required",
+            "FAILED_PERMANENT": "Review required",
+            "BLOCKED": "Blocked",
+        }
+        status_lines = [
+            f"- **{status_names.get(status, status.title())}:** {count}"
+            for status, count in sorted(outlook.get("status_counts", {}).items())
+            if count
+        ]
+        advancements = outlook.get("advancements", [])
+        advancement_lines = [
+            f"- **`{item['id']}`** — {item['title']}"
+            for item in advancements
+        ] or ["- No declaration entered the proven knowledge base during this review window."]
+        priorities = outlook.get("priorities", [])
+        priority_lines = [
+            f"{index}. **`{item['id']}`** — {item['action']}: {item['title']}"
+            for index, item in enumerate(priorities, start=1)
+        ] or ["1. Extend the curriculum with the next dependency-backed research question."]
+
+        content = f"""# Weekly Research Outlook
+
+*Research Manager review for Sunday, {date_str}.*
+
+## Status Review
+
+The curriculum contains **{outlook.get('frontier_count', 0)}** tracked items across **{outlook.get('current_cycle', 1) - 1}** completed volume slots. The proven knowledge base currently contains **{outlook.get('proven_count', 0)}** items.
+
+{chr(10).join(status_lines)}
+
+## Advancements
+
+{chr(10).join(advancement_lines)}
+
+## Plan for the Week Ahead
+
+{chr(10).join(priority_lines)}
+
+## Research Manager's Note
+
+The coming week will preserve the evidence gate: computational searches may advance a candidate to proof planning, but only exact-declaration verification can change the proven knowledge base. Deferred and incomplete work will be activated deliberately rather than retried automatically.
+
+---
+
+*Prepared by the Research Manager and published by the research collective.*
+"""
+
+        self._atomic_write_text(filepath, content)
+        self.sync_site_index()
+        self.log_event("WEEKLY_OUTLOOK_PUBLISHED", "ResearchManager", {
+            "file": filename,
+            "proven_items": outlook.get("proven_count", 0),
+            "planned_items": len(priorities),
+        })
         return filepath

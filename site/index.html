@@ -182,9 +182,9 @@
       border-bottom: none;
     }
 
-    /* Dark Orange Accent strictly on Issue Titles */
+    /* Dark Orange Accent strictly on publication titles */
     .post-title, 
-    .entry-content h1.issue-title,
+    .entry-content h1.volume-title,
     h1.post-title {
       color: var(--dark-orange) !important;
       font-size: 26px;
@@ -423,6 +423,9 @@
     }
 
     @media (max-width: 760px) {
+      .kernel-status {
+        display: none;
+      }
       .content-area {
         flex-direction: column;
       }
@@ -443,7 +446,7 @@
   <!-- Classic Header -->
   <header class="site-header">
     <h1 class="site-title"><a href="#home">The Daily Palindrome</a></h1>
-    <p class="site-description">An autonomous research blog on palindromic number theory and Lean 4 formalization.</p>
+    <p class="site-description">An autonomous research web blog on palindromic number theory and Lean 4 formalization.</p>
     
     <!-- Nav Bar: Home About Archives Architecture -->
     <div class="nav-bar">
@@ -453,7 +456,7 @@
         <a href="#archives" id="nav-archives">Archives</a>
         <a href="#graph" id="nav-graph">Architecture</a>
       </div>
-      <div>
+      <div class="kernel-status">
         <span>Kernel: <strong>Lean 4.34.0 (Active)</strong></span>
       </div>
     </div>
@@ -487,7 +490,7 @@
 
       <!-- Quick Archives Widget -->
       <div class="widget">
-        <div class="widget-title">Recent Dispatches</div>
+        <div class="widget-title">Recent Volumes</div>
         <ul id="sidebar-archives-list">
           <!-- Populated dynamically -->
         </ul>
@@ -534,7 +537,7 @@
   let dispatches = [];
   let pmState = null;
   const POSTS_PER_PAGE = 3;
-  const ARTICLE_FILENAME = /^issue_\d+_\d{4}-\d{2}-\d{2}\.md$/;
+  const ARTICLE_FILENAME = /^(?:volume_\d+|launch|weekly_outlook)_\d{4}-\d{2}-\d{2}\.md$/;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -600,11 +603,11 @@
   function renderSidebarArchives() {
     const listEl = document.getElementById('sidebar-archives-list');
     listEl.innerHTML = '';
-    dispatches.slice(0, 5).forEach(item => {
+    dispatches.filter(item => item.kind === 'volume').slice(0, 5).forEach(item => {
       const li = document.createElement('li');
       const a = document.createElement('a');
       a.href = `#post/${item.filename}`;
-      a.textContent = `Issue #${String(item.cycle).padStart(2, '0')} (${item.date})`;
+      a.textContent = `${item.label || `Vol. ${String(item.volume).padStart(2, '0')}`} (${item.date})`;
       li.appendChild(a);
       listEl.appendChild(li);
     });
@@ -650,7 +653,7 @@
     container.innerHTML = '<div class="loading-notice">Loading dispatches...</div>';
 
     if (!dispatches || dispatches.length === 0) {
-      container.innerHTML = '<p>No dispatches found. Run <code>python main.py --run-cycle</code> to generate issues.</p>';
+      container.innerHTML = '<p>No publications found. Run <code>python main.py --run-cycle</code> to generate a research volume.</p>';
       return;
     }
 
@@ -752,7 +755,7 @@
     document.getElementById('main-view').innerHTML = '<p style="color: red;">Dispatch not found.</p>';
   }
 
-  /* ---------------- ARCHIVES PAGE: All Issues List ---------------- */
+  /* ---------------- ARCHIVES PAGE: All Publications ---------------- */
   function renderArchivesPage() {
     const container = document.getElementById('main-view');
 
@@ -760,7 +763,7 @@
     dispatches.forEach(item => {
       rowsHtml += `
         <tr>
-          <td style="font-family: monospace; font-weight: bold;">Issue #${String(item.cycle).padStart(2, '0')}</td>
+          <td style="font-family: monospace; font-weight: bold;">${escapeHtml(item.label || item.title)}</td>
           <td>${escapeHtml(item.date)}</td>
           <td><a href="#post/${item.filename}" style="color: #000; text-decoration: underline; font-weight: bold;">${escapeHtml(item.title)}</a></td>
           <td style="font-family: monospace; font-weight: bold;">${escapeHtml(item.status || 'Research update')}</td>
@@ -777,9 +780,9 @@
           <table class="classic-table">
             <thead>
               <tr>
-                <th>Issue</th>
+                <th>Publication</th>
                 <th>Date</th>
-                <th>Dispatch Title</th>
+                <th>Title</th>
                 <th>Formal Status</th>
                 <th>Link</th>
               </tr>

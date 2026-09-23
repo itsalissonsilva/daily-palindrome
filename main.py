@@ -26,6 +26,17 @@ DISPATCHES_DIR = os.path.join(PROJECT_ROOT, "dispatches")
 STATE_FILE = os.path.join(PROJECT_ROOT, "pm_state.json")
 LOG_FILE = os.path.join(LOGS_DIR, "research_log.jsonl")
 
+
+def publish_weekly_outlook_if_due(pm, chronicler, force: bool = False):
+    """Publish one date-keyed Research Manager outlook on Sundays."""
+    now = datetime.now()
+    if not force and now.weekday() != 6:
+        return None
+    return chronicler.publish_weekly_outlook(
+        pm.build_weekly_outlook(),
+        publication_date=now.strftime("%Y-%m-%d"),
+    )
+
 def run_cycle():
     """Execute one gated research cycle."""
     print("=" * 70)
@@ -64,6 +75,9 @@ def run_cycle():
     candidates = pm.get_low_hanging_fruit()
     if not candidates:
         print("[Research Manager Agent] No actionable work. Deferred and failed items require explicit activation or retry.")
+        outlook_path = publish_weekly_outlook_if_due(pm, chronicler)
+        if outlook_path:
+            print(f"[OK] [Research Manager Agent] Weekly Research Outlook published to:\n    {outlook_path}")
         return "NO_ACTIONABLE_WORK"
     print(f"Found {len(candidates)} actionable candidate tasks ready for exploration.")
 
@@ -181,6 +195,10 @@ def run_cycle():
     })
     pm.increment_cycle()
 
+    outlook_path = publish_weekly_outlook_if_due(pm, chronicler)
+    if outlook_path:
+        print(f"[OK] [Research Manager Agent] Weekly Research Outlook published to:\n    {outlook_path}")
+
     # Sync web blog
     chronicler.sync_site_index()
 
@@ -291,6 +309,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-cycles", type=int, default=None, help="Maximum number of cycles to execute before stopping")
     parser.add_argument("--status", action="store_true", help="Display current curriculum DAG status")
     parser.add_argument("--audit-certificates", action="store_true", help="Re-verify every proven Lean declaration")
+    parser.add_argument("--weekly-outlook", action="store_true", help="Publish the Research Manager's weekly outlook now")
     parser.add_argument("--activate", metavar="ITEM_ID", help="Activate a deferred or blocked frontier item")
     parser.add_argument("--retry", metavar="ITEM_ID", help="Explicitly requeue a failed frontier item")
     parser.add_argument("--serve", action="store_true", help="Launch local blog viewer on http://localhost:8000")
@@ -312,6 +331,11 @@ if __name__ == "__main__":
         print_status()
     elif args.audit_certificates:
         raise SystemExit(0 if audit_certificates() else 1)
+    elif args.weekly_outlook:
+        manager = ProjectManager(STATE_FILE)
+        publisher = Chronicler(DISPATCHES_DIR, LOG_FILE)
+        path = publish_weekly_outlook_if_due(manager, publisher, force=True)
+        print(f"Weekly Research Outlook published to: {path}")
     elif args.run_cycle:
         run_cycle()
     else:

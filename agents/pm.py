@@ -328,6 +328,66 @@ class ProjectManager:
         self.state.setdefault("daily_cycles", []).append(record)
         self.save_state()
 
+    def build_weekly_outlook(self) -> Dict[str, Any]:
+        """Summarize the frontier for the Research Manager's Sunday review."""
+        status_counts: Dict[str, int] = {}
+        for item in self.state["frontier"]:
+            status = item["status"]
+            status_counts[status] = status_counts.get(status, 0) + 1
+
+        proven_ids = set(self.state.get("proven_knowledge_base", []))
+        advancements = [
+            {"id": item["id"], "title": item["title"]}
+            for item in self.state["frontier"]
+            if item["id"] in proven_ids
+        ]
+
+        priorities = []
+        action_by_status = {
+            ItemStatus.QUEUED.value: "Advance through the empirical gate",
+            ItemStatus.IN_PROGRESS.value: "Complete the active proof path",
+            ItemStatus.FAILED_RETRYABLE.value: "Review evidence before an explicit retry",
+            ItemStatus.PARTIAL_SORRY.value: "Replace the incomplete formal path",
+            ItemStatus.FAILED_PERMANENT.value: "Reassess the conjecture and proof target",
+            ItemStatus.COUNTEREXAMPLE_FOUND.value: "Study the counterexample and revise scope",
+            ItemStatus.BLOCKED.value: "Resolve dependencies before activation",
+            ItemStatus.QUEUED_DEFERRED.value: "Evaluate deliberate activation",
+        }
+        status_order = {
+            ItemStatus.QUEUED.value: 0,
+            ItemStatus.IN_PROGRESS.value: 1,
+            ItemStatus.FAILED_RETRYABLE.value: 2,
+            ItemStatus.PARTIAL_SORRY.value: 3,
+            ItemStatus.BLOCKED.value: 4,
+            ItemStatus.QUEUED_DEFERRED.value: 5,
+            ItemStatus.COUNTEREXAMPLE_FOUND.value: 6,
+            ItemStatus.FAILED_PERMANENT.value: 7,
+        }
+        candidates = [
+            item for item in self.state["frontier"]
+            if item["status"] not in PROVEN_STATUSES
+        ]
+        candidates.sort(key=lambda item: (
+            status_order.get(item["status"], 99),
+            item.get("tier", 99),
+            item["id"],
+        ))
+        for item in candidates[:5]:
+            priorities.append({
+                "id": item["id"],
+                "title": item["title"],
+                "action": action_by_status.get(item["status"], "Review next action"),
+            })
+
+        return {
+            "current_cycle": self.state.get("current_cycle", 1),
+            "frontier_count": len(self.state["frontier"]),
+            "proven_count": len(proven_ids),
+            "status_counts": status_counts,
+            "advancements": advancements,
+            "priorities": priorities,
+        }
+
     def increment_cycle(self):
         """Advances to next daily cycle."""
         self.state["current_cycle"] = self.state.get("current_cycle", 1) + 1
