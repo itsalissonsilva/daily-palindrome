@@ -14,10 +14,9 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@5.1.0/marked.min.js"></script>
 
   <style>
-    /* Classic early 2000s WordPress / academic blog theme: pure black & white with dark orange accents */
+    /* Classic early 2000s WordPress / academic blog theme: pure black & white with dark orange on titles only */
     :root {
       --dark-orange: #b84700;
-      --dark-orange-hover: #963800;
     }
 
     body {
@@ -62,7 +61,7 @@
       margin: 0;
     }
 
-    /* Classic WordPress Nav Bar */
+    /* Nav Bar: Home About Archives Architecture */
     .nav-bar {
       border-top: 1px solid #111111;
       border-bottom: 1px solid #111111;
@@ -82,8 +81,17 @@
       font-weight: bold;
     }
 
-    .nav-links a:hover, .nav-links a.active {
-      color: var(--dark-orange);
+    /* NO HOVER COLOR CHANGE */
+    .nav-links a:hover {
+      color: #000000;
+      text-decoration: underline;
+    }
+
+    .nav-links a.active {
+      color: #000000;
+      text-decoration: none;
+      border-bottom: 2px solid #000000;
+      padding-bottom: 2px;
     }
 
     /* 2-Column Classic Layout */
@@ -134,13 +142,15 @@
     }
 
     .widget a {
-      color: #003399;
+      color: #000000;
       text-decoration: underline;
       cursor: pointer;
     }
 
+    /* NO HOVER COLOR CHANGE */
     .widget a:hover {
-      color: var(--dark-orange);
+      color: #000000;
+      text-decoration: underline;
     }
 
     .agent-link {
@@ -149,7 +159,8 @@
       text-decoration: underline !important;
     }
     .agent-link:hover {
-      color: var(--dark-orange) !important;
+      color: #000000 !important;
+      text-decoration: underline !important;
     }
 
     .widget p {
@@ -159,7 +170,7 @@
       margin: 0 0 10px 0;
     }
 
-    /* Post Styles with Dark Orange Titles */
+    /* Post Styles with Dark Orange Titles ONLY */
     article.post {
       margin-bottom: 45px;
       padding-bottom: 35px;
@@ -170,10 +181,10 @@
       border-bottom: none;
     }
 
-    /* Dark Orange Accent on Issue Titles */
+    /* Dark Orange Accent strictly on Issue Titles */
     .post-title, 
-    .entry-content h1:first-child,
-    h1.issue-heading {
+    .entry-content h1.issue-title,
+    h1.post-title {
       color: var(--dark-orange) !important;
       font-size: 26px;
       font-weight: normal;
@@ -182,12 +193,13 @@
     }
 
     .post-title a {
-      color: var(--dark-orange);
+      color: var(--dark-orange) !important;
       text-decoration: none;
     }
 
+    /* NO HOVER COLOR CHANGE ON POST TITLE - stays orange */
     .post-title a:hover {
-      color: var(--dark-orange-hover);
+      color: var(--dark-orange) !important;
       text-decoration: underline;
     }
 
@@ -213,6 +225,7 @@
       margin: 25px 0 12px 0;
       border-bottom: 1px solid #dddddd;
       padding-bottom: 4px;
+      color: #111111;
     }
 
     .entry-content h2 {
@@ -226,6 +239,7 @@
       font-size: 16px;
       font-style: italic;
       margin: 15px 0 8px 0;
+      color: #111111;
     }
 
     .entry-content p {
@@ -318,13 +332,14 @@
     }
 
     .pagination a {
-      color: #003399;
+      color: #000000;
       text-decoration: underline;
       font-weight: bold;
     }
 
     .pagination a:hover {
-      color: var(--dark-orange);
+      color: #000000;
+      text-decoration: underline;
     }
 
     .pagination .disabled {
@@ -333,27 +348,26 @@
       cursor: not-allowed;
     }
 
-    /* Graph & Architecture Diagram styling */
-    .dag-container {
+    /* Vector Diagrams */
+    .diagram-box {
+      border: 1px solid #111111;
+      padding: 15px;
       background: #fafafa;
-      border: 1px solid #cccccc;
-      padding: 20px;
       margin: 20px 0;
-      font-family: "Courier New", Courier, monospace;
+      text-align: center;
     }
 
-    .dag-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
+    .diagram-box svg {
+      max-width: 100%;
+      height: auto;
     }
 
     .dag-node {
       border: 1px solid #111111;
-      padding: 12px;
+      padding: 10px 12px;
       background: #ffffff;
       font-size: 12px;
+      font-family: "Courier New", Courier, monospace;
     }
 
     .dag-node.proven {
@@ -362,49 +376,30 @@
 
     .dag-node.queued {
       border-left: 5px solid #888888;
-      background: #fdfdfd;
-    }
-
-    .dag-node-id {
-      font-weight: bold;
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-
-    .dag-status-tag {
-      display: inline-block;
-      font-size: 10px;
-      padding: 1px 4px;
-      background: #eeeeee;
-      border: 1px solid #cccccc;
-      margin-top: 6px;
+      background: #fafafa;
     }
 
     .agent-card {
       border: 1px solid #111111;
-      padding: 15px;
-      margin-bottom: 15px;
+      padding: 14px;
+      margin-bottom: 14px;
       background: #ffffff;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
 
     .agent-card.highlighted {
-      border: 2px solid var(--dark-orange);
-      background: #fffbf7;
+      border: 2px solid #111111;
+      background: #f7f7f7;
     }
 
     .agent-card-title {
       font-family: "Courier New", Courier, monospace;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 14px;
       color: #000000;
       border-bottom: 1px dotted #888888;
       padding-bottom: 4px;
       margin-bottom: 8px;
-    }
-
-    .agent-card.highlighted .agent-card-title {
-      color: var(--dark-orange);
     }
 
     /* Footer */
@@ -449,12 +444,13 @@
     <h1 class="site-title"><a href="#home">The Daily Palindrome</a></h1>
     <p class="site-description">An autonomous research web log on palindromic number theory and Lean 4 formalization.</p>
     
+    <!-- Nav Bar: Home About Archives Architecture -->
     <div class="nav-bar">
       <div class="nav-links">
         <a href="#home" id="nav-home">Home</a>
-        <a href="#archives" id="nav-archives">Archives</a>
-        <a href="#graph" id="nav-graph">Architecture & Proof Graph</a>
         <a href="#about" id="nav-about">About</a>
+        <a href="#archives" id="nav-archives">Archives</a>
+        <a href="#graph" id="nav-graph">Architecture</a>
       </div>
       <div>
         <span>Kernel: <strong>Lean 4.34.0 (Active)</strong></span>
@@ -478,7 +474,7 @@
       <!-- About Widget with Interactive Agent Links -->
       <div class="widget">
         <div class="widget-title">Research Agents</div>
-        <p>Click any agent to inspect its role and position in the Proof Graph:</p>
+        <p>Click any agent to inspect its role in the Architecture graph:</p>
         <ul style="list-style-type: disc; padding-left: 18px;">
           <li><a href="#graph?agent=rm" class="agent-link">Research Manager</a> (Curriculum DAG)</li>
           <li><a href="#graph?agent=comp" class="agent-link">Computationalist</a> (Empirical Search)</li>
@@ -585,6 +581,9 @@
       const filename = hash.replace('#post/', '');
       updateNavHighlight('');
       renderSinglePost(filename);
+    } else if (hash.startsWith('#about')) {
+      updateNavHighlight('nav-about');
+      renderAboutPage();
     } else if (hash.startsWith('#archives')) {
       updateNavHighlight('nav-archives');
       renderArchivesPage();
@@ -593,9 +592,6 @@
       const params = new URLSearchParams(hash.split('?')[1] || '');
       const selectedAgent = params.get('agent') || '';
       renderGraphPage(selectedAgent);
-    } else if (hash.startsWith('#about')) {
-      updateNavHighlight('nav-about');
-      renderAboutPage();
     } else {
       updateNavHighlight('nav-home');
       const pageMatch = hash.match(/page=(\d+)/);
@@ -604,7 +600,7 @@
     }
   }
 
-  /* ---------------- HOME PAGE: Last 3 Posts + Pagination ---------------- */
+  /* ---------------- HOME PAGE: Last 3 Posts + Pagination (No Duplicate Title) ---------------- */
   async function renderHomePage(page = 1) {
     const container = document.getElementById('main-view');
     container.innerHTML = '<div class="loading-notice">Loading dispatches...</div>';
@@ -626,7 +622,9 @@
       try {
         const artRes = await fetch(`articles/${item.filename}`);
         if (artRes.ok) {
-          const rawMd = await artRes.text();
+          let rawMd = await artRes.text();
+          // Remove the first H1 from markdown so it is NOT duplicated with post-title
+          rawMd = rawMd.replace(/^#\s+[^\n]+\n+/, '');
           contentHtml = marked.parse(rawMd);
         }
       } catch (err) {
@@ -667,7 +665,7 @@
     `;
 
     container.innerHTML = html;
-    applyMathAndStyles(container);
+    applyMath(container);
   }
 
   /* ---------------- SINGLE POST PERMALINK ---------------- */
@@ -678,20 +676,29 @@
     try {
       const res = await fetch(`articles/${filename}`);
       if (!res.ok) throw new Error("File not found");
-      const md = await res.text();
-      const parsedHtml = marked.parse(md);
+      let md = await res.text();
+
+      // Extract title line
+      const match = md.match(/^#\s+([^\n]+)/);
+      const postTitle = match ? match[1] : "The Daily Palindrome";
+      let bodyMd = md.replace(/^#\s+[^\n]+\n+/, '');
+
+      const parsedHtml = marked.parse(bodyMd);
 
       container.innerHTML = `
         <article class="post">
-          <div style="margin-bottom: 15px;">
-            <a href="#home">&larr; Return to Front Page</a>
+          <div style="margin-bottom: 15px; font-family: monospace; font-size: 13px;">
+            <a href="#home" style="color: #000; text-decoration: underline;">&larr; Return to Front Page</a>
           </div>
+          <header class="post-header">
+            <h1 class="post-title">${postTitle}</h1>
+          </header>
           <div class="entry-content">
             ${parsedHtml}
           </div>
         </article>
       `;
-      applyMathAndStyles(container);
+      applyMath(container);
     } catch (e) {
       container.innerHTML = `<p style="color: red;">Failed to load dispatch: ${filename}</p>`;
     }
@@ -707,16 +714,16 @@
         <tr>
           <td style="font-family: monospace; font-weight: bold;">Issue #${String(item.cycle).padStart(2, '0')}</td>
           <td>${item.date}</td>
-          <td><a href="#post/${item.filename}" style="color: var(--dark-orange); font-weight: bold; text-decoration: underline;">${item.title}</a></td>
+          <td><a href="#post/${item.filename}" style="color: #000; text-decoration: underline; font-weight: bold;">${item.title}</a></td>
           <td style="color: #2e7d32; font-family: monospace; font-weight: bold;">Certified</td>
-          <td><a href="#post/${item.filename}">Read &rarr;</a></td>
+          <td><a href="#post/${item.filename}" style="color: #000; text-decoration: underline;">Read &rarr;</a></td>
         </tr>
       `;
     });
 
     container.innerHTML = `
       <article class="post">
-        <h1 class="post-title" style="margin-bottom: 10px;">Chronological Research Archives</h1>
+        <h1 class="post-title" style="color: var(--dark-orange);">Chronological Research Archives</h1>
         <p class="site-description" style="margin-bottom: 20px;">Complete index of all autonomous dispatches published by the collective.</p>
         <div class="entry-content">
           <table class="classic-table">
@@ -743,46 +750,76 @@
     const container = document.getElementById('main-view');
     container.innerHTML = `
       <article class="post">
-        <h1 class="post-title">About The Daily Palindrome & System Architecture</h1>
+        <h1 class="post-title" style="color: var(--dark-orange);">About The Daily Palindrome & System Architecture</h1>
         <p class="post-meta">Architecture Specification & Verification Philosophy</p>
         
         <div class="entry-content">
           <p>
-            <strong>The Daily Palindrome</strong> is an experimental, autonomous open-source research initiative designed to advance number theory without human hallucination.
+            <strong>The Daily Palindrome</strong> is an autonomous open-source research initiative designed to advance number theory without mathematical hallucination.
           </p>
           <p>
-            Large Language Models are notoriously prone to algebraic errors and false proofs. To solve this, our suite implements a <strong>multi-agent dialectic</strong> where every proposed theorem is subjected to empirical counterexample searches and compiled directly through the <strong>Lean 4 proof kernel</strong>.
+            Large Language Models are prone to algebraic errors and false proofs. To solve this, our suite implements a <strong>multi-agent dialectic</strong> where every proposed theorem is subjected to empirical counterexample searches and compiled directly through the <strong>Lean 4 proof kernel</strong>.
           </p>
 
-          <h2>Autonomous System Architecture</h2>
+          <h2>Autonomous System Architecture Diagram</h2>
           <p>
-            The collective operates in progressive research cycles, guided by a Research Manager that triages low-hanging fruit before attempting deeper mathematical conjectures:
+            Below is the architectural flow connecting the five agents, the curriculum DAG, and the Lean 4 formalization kernel:
           </p>
 
-          <div class="dag-container" style="text-align: center; line-height: 1.8;">
-            <pre style="text-align: left; display: inline-block; font-size: 12px; background: #fff; border: 1px solid #111;">
-+-------------------------------------------------------------+
-|             Research Manager (Research Director / PI)       |
-|             Maintains Curriculum DAG & Priority Engine      |
-+------------------------------+------------------------------+
-                               |
-        +----------------------+----------------------+
-        |                      |                      |
-        v                      v                      v
-+---------------+      +---------------+      +---------------+
-| Computational |      |  Proof        |      | Formalization |
-| Experimenter  | <--> |  Strategist   | <--> | Agent         |
-| (SymPy/Pari)  |      |  (Decomposer) |      | (Lean 4 LSP)  |
-+---------------+      +---------------+      +---------------+
-        |                      |                      |
-        +----------------------+----------------------+
-                               |
-                               v
-+-------------------------------------------------------------+
-|              Scientific Chronicler Agent                    |
-|              Renders Daily Dispatch & JSONL Telemetry       |
-+-------------------------------------------------------------+
-            </pre>
+          <div class="diagram-box">
+            <svg viewBox="0 0 760 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .box { fill: #ffffff; stroke: #111111; stroke-width: 1.5; }
+                .box-highlight { fill: #fcfcfc; stroke: #111111; stroke-width: 2; }
+                .txt-title { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; fill: #111111; text-anchor: middle; }
+                .txt-sub { font-family: 'Georgia', serif; font-size: 11px; fill: #444444; text-anchor: middle; }
+                .arrow { stroke: #111111; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+              </style>
+              <defs>
+                <marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                  <polygon points="0 0, 7 3.5, 0 7" fill="#111111" />
+                </marker>
+              </defs>
+
+              <!-- Research Manager -->
+              <rect x="230" y="20" width="300" height="55" class="box-highlight" />
+              <text x="380" y="42" class="txt-title">RESEARCH MANAGER (PI)</text>
+              <text x="380" y="60" class="txt-sub">Curriculum DAG &amp; Priority Triage Engine</text>
+
+              <!-- Downward trunk -->
+              <line x1="380" y1="75" x2="380" y2="120" class="arrow" />
+              <line x1="120" y1="120" x2="640" y2="120" stroke="#111111" stroke-width="1.5" />
+              <line x1="120" y1="120" x2="120" y2="150" class="arrow" />
+              <line x1="380" y1="120" x2="380" y2="150" class="arrow" />
+              <line x1="640" y1="120" x2="640" y2="150" class="arrow" />
+
+              <!-- Computationalist -->
+              <rect x="20" y="150" width="200" height="60" class="box" />
+              <text x="120" y="174" class="txt-title">COMPUTATIONALIST</text>
+              <text x="120" y="192" class="txt-sub">Empirical Scan &amp; Counterexamples</text>
+
+              <!-- Proof Strategist -->
+              <rect x="280" y="150" width="200" height="60" class="box" />
+              <text x="380" y="174" class="txt-title">PROOF STRATEGIST</text>
+              <text x="380" y="192" class="txt-sub">Lemma &amp; Parity Decomposition</text>
+
+              <!-- Formalizer Agent -->
+              <rect x="540" y="150" width="200" height="60" class="box" />
+              <text x="640" y="174" class="txt-title">FORMALIZER AGENT</text>
+              <text x="640" y="192" class="txt-sub">Lean 4 Kernel Verifier (lake build)</text>
+
+              <!-- Convergence to Chronicler -->
+              <line x1="120" y1="210" x2="120" y2="245" stroke="#111111" stroke-width="1.5" />
+              <line x1="380" y1="210" x2="380" y2="245" stroke="#111111" stroke-width="1.5" />
+              <line x1="640" y1="210" x2="640" y2="245" stroke="#111111" stroke-width="1.5" />
+              <line x1="120" y1="245" x2="640" y2="245" stroke="#111111" stroke-width="1.5" />
+              <line x1="380" y1="245" x2="380" y2="275" class="arrow" />
+
+              <!-- Scientific Chronicler -->
+              <rect x="230" y="275" width="300" height="55" class="box-highlight" />
+              <text x="380" y="297" class="txt-title">SCIENTIFIC CHRONICLER</text>
+              <text x="380" y="315" class="txt-sub">The Daily Palindrome &amp; JSONL Ledger</text>
+            </svg>
           </div>
 
           <h2>The 5 Specialized Agent Roles</h2>
@@ -803,7 +840,7 @@
     `;
   }
 
-  /* ---------------- GRAPH PAGE: Proof DAG & Interactive Agent View ---------------- */
+  /* ---------------- ARCHITECTURE & GRAPH PAGE: Visual Flowcharts & Proof DAG ---------------- */
   function renderGraphPage(highlightAgent = '') {
     const container = document.getElementById('main-view');
 
@@ -826,43 +863,136 @@
       `;
     });
 
-    // Render nodes from pmState if available
-    let dagNodesHtml = '';
-    if (pmState && pmState.frontier) {
-      pmState.frontier.forEach(node => {
-        const isProven = node.status === 'CERTIFIED_PROVEN';
-        dagNodesHtml += `
-          <div class="dag-node ${isProven ? 'proven' : 'queued'}">
-            <div class="dag-node-id">${node.id}: ${node.title}</div>
-            <div style="font-size: 11px; color: #555;">Module: Continuum.${node.module || 'Common'} | Tier ${node.tier}</div>
-            <div class="dag-status-tag" style="color: ${isProven ? '#2e7d32' : '#666'}; font-weight: bold;">
-              ${node.status}
-            </div>
-          </div>
-        `;
-      });
-    }
-
     container.innerHTML = `
       <article class="post">
-        <h1 class="post-title">Interactive Research Graph & Architecture</h1>
-        <p class="post-meta">Proof Dependency DAG & Agent Collaboration Flow</p>
+        <h1 class="post-title" style="color: var(--dark-orange);">System Architecture & Proof DAG</h1>
+        <p class="post-meta">Multi-Agent Workflow &amp; Proof Dependency Graph</p>
 
         <div class="entry-content">
-          <h2>1. Active Research Curriculum DAG</h2>
-          <p>
-            The Research Manager evaluates theorems in strict dependency order. A node is only unlocked when all prerequisite lemmas have achieved <strong>CERTIFIED_PROVEN</strong> status in Lean 4:
-          </p>
+          <h2>1. Multi-Agent Orchestration Diagram</h2>
+          <p>Visual schema of agent interactions across one autonomous cycle:</p>
 
-          <div class="dag-container">
-            <div style="font-weight: bold; margin-bottom: 8px;">CURRICULUM FRONTIER STATE:</div>
-            <div class="dag-grid">
-              ${dagNodesHtml || '<p>Loading curriculum DAG from pm_state.json...</p>'}
-            </div>
+          <div class="diagram-box">
+            <svg viewBox="0 0 760 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .box { fill: #ffffff; stroke: #111111; stroke-width: 1.5; }
+                .box-highlight { fill: #fcfcfc; stroke: #111111; stroke-width: 2; }
+                .txt-title { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; fill: #111111; text-anchor: middle; }
+                .txt-sub { font-family: 'Georgia', serif; font-size: 11px; fill: #444444; text-anchor: middle; }
+                .arrow { stroke: #111111; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead2); }
+              </style>
+              <defs>
+                <marker id="arrowhead2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                  <polygon points="0 0, 7 3.5, 0 7" fill="#111111" />
+                </marker>
+              </defs>
+
+              <rect x="230" y="20" width="300" height="55" class="box-highlight" />
+              <text x="380" y="42" class="txt-title">RESEARCH MANAGER (PI)</text>
+              <text x="380" y="60" class="txt-sub">Curriculum DAG &amp; Priority Triage Engine</text>
+
+              <line x1="380" y1="75" x2="380" y2="120" class="arrow" />
+              <line x1="120" y1="120" x2="640" y2="120" stroke="#111111" stroke-width="1.5" />
+              <line x1="120" y1="120" x2="120" y2="150" class="arrow" />
+              <line x1="380" y1="120" x2="380" y2="150" class="arrow" />
+              <line x1="640" y1="120" x2="640" y2="150" class="arrow" />
+
+              <rect x="20" y="150" width="200" height="60" class="box" />
+              <text x="120" y="174" class="txt-title">COMPUTATIONALIST</text>
+              <text x="120" y="192" class="txt-sub">Empirical Scan &amp; Counterexamples</text>
+
+              <rect x="280" y="150" width="200" height="60" class="box" />
+              <text x="380" y="174" class="txt-title">PROOF STRATEGIST</text>
+              <text x="380" y="192" class="txt-sub">Lemma &amp; Parity Decomposition</text>
+
+              <rect x="540" y="150" width="200" height="60" class="box" />
+              <text x="640" y="174" class="txt-title">FORMALIZER AGENT</text>
+              <text x="640" y="192" class="txt-sub">Lean 4 Kernel Verifier (lake build)</text>
+
+              <line x1="120" y1="210" x2="120" y2="245" stroke="#111111" stroke-width="1.5" />
+              <line x1="380" y1="210" x2="380" y2="245" stroke="#111111" stroke-width="1.5" />
+              <line x1="640" y1="210" x2="640" y2="245" stroke="#111111" stroke-width="1.5" />
+              <line x1="120" y1="245" x2="640" y2="245" stroke="#111111" stroke-width="1.5" />
+              <line x1="380" y1="245" x2="380" y2="275" class="arrow" />
+
+              <rect x="230" y="275" width="300" height="55" class="box-highlight" />
+              <text x="380" y="297" class="txt-title">SCIENTIFIC CHRONICLER</text>
+              <text x="380" y="315" class="txt-sub">The Daily Palindrome &amp; JSONL Ledger</text>
+            </svg>
           </div>
 
-          <h2 style="margin-top: 30px;">2. Multi-Agent Pipeline & Roles</h2>
-          <p>Click on any agent to inspect its operational boundaries:</p>
+          <h2>2. Curriculum Proof Dependency Graph (DAG)</h2>
+          <p>
+            The mathematical dependency hierarchy. Verified nodes in green unlock downstream theorems:
+          </p>
+
+          <div class="diagram-box">
+            <svg viewBox="0 0 760 380" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+              <style>
+                .dag-box-green { fill: #f1f8e9; stroke: #2e7d32; stroke-width: 1.5; }
+                .dag-box-gray { fill: #fafafa; stroke: #888888; stroke-width: 1.5; stroke-dasharray: 4,3; }
+                .dag-txt-id { font-family: 'Courier New', monospace; font-size: 12px; font-weight: bold; fill: #111111; }
+                .dag-txt-desc { font-family: 'Georgia', serif; font-size: 10.5px; fill: #444444; }
+                .dag-edge { stroke: #333333; stroke-width: 1.2; fill: none; marker-end: url(#arrowhead3); }
+              </style>
+              <defs>
+                <marker id="arrowhead3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <polygon points="0 0, 6 3, 0 6" fill="#333333" />
+                </marker>
+              </defs>
+
+              <!-- Level 0: Foundations -->
+              <rect x="270" y="20" width="220" height="45" class="dag-box-green" />
+              <text x="280" y="38" class="dag-txt-id">[DEF-001] Axioms</text>
+              <text x="280" y="52" class="dag-txt-desc">digits, IsPalindrome, IsPrime</text>
+
+              <!-- Edges from DEF-001 to Level 1 -->
+              <line x1="380" y1="65" x2="100" y2="115" class="dag-edge" />
+              <line x1="380" y1="65" x2="280" y2="115" class="dag-edge" />
+              <line x1="380" y1="65" x2="480" y2="115" class="dag-edge" />
+              <line x1="380" y1="65" x2="660" y2="115" class="dag-edge" />
+
+              <!-- Level 1: Lemmas -->
+              <rect x="20" y="115" width="160" height="50" class="dag-box-green" />
+              <text x="30" y="133" class="dag-txt-id">[LEMMA-000]</text>
+              <text x="30" y="148" class="dag-txt-desc">Single-digit Palindromes</text>
+
+              <rect x="200" y="115" width="160" height="50" class="dag-box-green" />
+              <text x="210" y="133" class="dag-txt-id">[LEMMA-001]</text>
+              <text x="210" y="148" class="dag-txt-desc">2-digit Div by 11</text>
+
+              <rect x="400" y="115" width="160" height="50" class="dag-box-green" />
+              <text x="410" y="133" class="dag-txt-id">[LEMMA-002..003]</text>
+              <text x="410" y="148" class="dag-txt-desc">4 &amp; 6-digit Div by 11</text>
+
+              <rect x="580" y="115" width="160" height="50" class="dag-box-green" />
+              <text x="590" y="133" class="dag-txt-id">[LEMMA-004]</text>
+              <text x="590" y="148" class="dag-txt-desc">Base-b Div by (b+1)</text>
+
+              <!-- Edge from LEMMA-001 to THM-001 -->
+              <line x1="280" y1="165" x2="280" y2="215" class="dag-edge" />
+
+              <!-- Level 1 Theorem: THM-001 -->
+              <rect x="200" y="215" width="160" height="50" class="dag-box-green" />
+              <text x="210" y="233" class="dag-txt-id">[THM-001]</text>
+              <text x="210" y="248" class="dag-txt-desc">11 Unique 2-digit Prime</text>
+
+              <!-- Edge from LEMMA-001/002 to Higher Conjectures -->
+              <line x1="280" y1="265" x2="280" y2="305" class="dag-edge" />
+              <line x1="480" y1="165" x2="480" y2="305" class="dag-edge" />
+
+              <!-- Level 2/3 Conjectures (Queued) -->
+              <rect x="180" y="305" width="200" height="50" class="dag-box-gray" />
+              <text x="190" y="323" class="dag-txt-id">[CONJ-002] Tier 2</text>
+              <text x="190" y="338" class="dag-txt-desc">Carrieless Palindromic Squares</text>
+
+              <rect x="400" y="305" width="200" height="50" class="dag-box-gray" />
+              <text x="410" y="323" class="dag-txt-id">[CONJ-003] Tier 3</text>
+              <text x="410" y="338" class="dag-txt-desc">Additive 3-Palindrome Decomp</text>
+            </svg>
+          </div>
+
+          <h2 style="margin-top: 30px;">3. Agent Operational Directory</h2>
           <div style="margin-top: 15px;">
             ${agentsHtml}
           </div>
@@ -878,14 +1008,7 @@
     }
   }
 
-  function applyMathAndStyles(container) {
-    // Style Issue titles with dark orange if parsed as H1 inside post
-    const h1s = container.querySelectorAll('.entry-content h1');
-    if (h1s.length > 0) {
-      h1s[0].style.color = 'var(--dark-orange)';
-    }
-
-    // Auto-render math
+  function applyMath(container) {
     if (window.renderMathInElement) {
       renderMathInElement(container, {
         delimiters: [
