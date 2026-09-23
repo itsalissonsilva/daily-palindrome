@@ -43,8 +43,8 @@ def run_cycle():
     current_cycle = pm.state.get("current_cycle", 1)
     theme = pm.state.get("theme", "Palindromic Number Theory")
 
-    print(f"\n[PM Agent] Initializing Cycle #{current_cycle:02d} on theme: '{theme}'")
-    chronicler.log_event("CYCLE_START", "ProjectManager", {"cycle": current_cycle, "theme": theme})
+    print(f"\n[Research Manager Agent] Initializing Cycle #{current_cycle:02d} on theme: '{theme}'")
+    chronicler.log_event("CYCLE_START", "ResearchManager", {"cycle": current_cycle, "theme": theme})
 
     # Step 1: Lake integrity build
     print("[Formalizer Agent] Running Lean 4 baseline integrity check...")
@@ -55,11 +55,11 @@ def run_cycle():
         return False
     print("[OK] [Formalizer Agent] Lean 4 kernel integrity confirmed (0 errors).")
 
-    # Step 2: PM Triages Low-Hanging Fruit
-    print("\n[PM Agent] Triaging Research Frontier for low-hanging fruit...")
+    # Step 2: Research Manager Triages Low-Hanging Fruit
+    print("\n[Research Manager Agent] Triaging Research Frontier for low-hanging fruit...")
     candidates = pm.get_low_hanging_fruit()
     if not candidates:
-        print("[PM Agent] All currently queued frontier candidates are certified or awaiting new hypotheses.")
+        print("[Research Manager Agent] All currently queued frontier candidates are certified or awaiting new hypotheses.")
         return "FRONTIER_EXHAUSTED"
     print(f"Found {len(candidates)} actionable candidate tasks ready for exploration.")
 

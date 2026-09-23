@@ -64,7 +64,7 @@ class Chronicler:
                         "cycle": cycle_num,
                         "filename": fname,
                         "date": date_val or datetime.now().strftime("%Y-%m-%d"),
-                        "title": f"The Palindrome Continuum — Issue #{cycle_num:02d}",
+                        "title": f"The Daily Palindrome — Issue #{cycle_num:02d}",
                         "url": f"articles/{fname}"
                     })
 
@@ -72,6 +72,14 @@ class Chronicler:
         index_file = os.path.join(self.site_dir, "dispatches.json")
         with open(index_file, "w", encoding="utf-8") as f:
             json.dump(entries, f, indent=2)
+
+        # Mirror pm_state.json for graph visualization
+        state_src = os.path.join(os.path.dirname(self.dispatches_dir), "pm_state.json")
+        if os.path.exists(state_src):
+            try:
+                shutil.copy2(state_src, os.path.join(self.site_dir, "pm_state.json"))
+            except Exception:
+                pass
 
     def publish_daily_article(
         self,
@@ -147,7 +155,7 @@ The **Computationalist** agent executed exhaustive searches to stress-test candi
 
 ## 4. Active Research Frontier & Open Conjectures
 
-The **Project Manager** has queued the following higher-tier hypotheses for the upcoming cycles:
+The **Research Manager** has queued the following higher-tier hypotheses for the upcoming cycles:
 
 """
         for conj in open_conjectures:

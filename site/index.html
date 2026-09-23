@@ -14,7 +14,12 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@5.1.0/marked.min.js"></script>
 
   <style>
-    /* Classic early 2000s WordPress / academic blog theme: pure black and white */
+    /* Classic early 2000s WordPress / academic blog theme: pure black & white with dark orange accents */
+    :root {
+      --dark-orange: #b84700;
+      --dark-orange-hover: #963800;
+    }
+
     body {
       background-color: #ffffff;
       color: #111111;
@@ -26,24 +31,23 @@
     }
 
     #page {
-      max-width: 920px;
-      margin: 20px auto 40px auto;
+      max-width: 960px;
+      margin: 20px auto 50px auto;
       padding: 0 20px;
     }
 
     /* Classic Blog Header */
-    header {
+    header.site-header {
       border-bottom: 3px double #111111;
-      padding-bottom: 15px;
-      margin-bottom: 25px;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
     }
 
     h1.site-title {
       font-size: 38px;
       font-weight: normal;
       letter-spacing: -0.5px;
-      margin: 0 0 5px 0;
-      text-transform: none;
+      margin: 0 0 4px 0;
     }
 
     h1.site-title a {
@@ -58,6 +62,7 @@
       margin: 0;
     }
 
+    /* Classic WordPress Nav Bar */
     .nav-bar {
       border-top: 1px solid #111111;
       border-bottom: 1px solid #111111;
@@ -67,15 +72,21 @@
       font-size: 13px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
     .nav-links a {
       color: #000000;
       text-decoration: underline;
-      margin-right: 15px;
+      margin-right: 18px;
+      font-weight: bold;
     }
 
-    /* Main 2-Column Classic Layout */
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--dark-orange);
+    }
+
+    /* 2-Column Classic Layout */
     .content-area {
       display: flex;
       gap: 35px;
@@ -88,7 +99,7 @@
     }
 
     aside#secondary {
-      width: 250px;
+      width: 260px;
       flex-shrink: 0;
       font-size: 14px;
       border-left: 1px solid #e0e0e0;
@@ -107,7 +118,7 @@
       text-transform: uppercase;
       border-bottom: 1px solid #111111;
       padding-bottom: 4px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       letter-spacing: 0.5px;
     }
 
@@ -118,7 +129,8 @@
     }
 
     .widget li {
-      margin-bottom: 6px;
+      margin-bottom: 7px;
+      line-height: 1.4;
     }
 
     .widget a {
@@ -128,7 +140,16 @@
     }
 
     .widget a:hover {
-      color: #000000;
+      color: var(--dark-orange);
+    }
+
+    .agent-link {
+      font-weight: bold;
+      color: #000000 !important;
+      text-decoration: underline !important;
+    }
+    .agent-link:hover {
+      color: var(--dark-orange) !important;
     }
 
     .widget p {
@@ -138,22 +159,36 @@
       margin: 0 0 10px 0;
     }
 
-    /* Article Styles */
+    /* Post Styles with Dark Orange Titles */
     article.post {
-      margin-bottom: 40px;
-      padding-bottom: 30px;
+      margin-bottom: 45px;
+      padding-bottom: 35px;
       border-bottom: 1px dashed #cccccc;
     }
 
-    .post-header {
-      margin-bottom: 15px;
+    article.post:last-of-type {
+      border-bottom: none;
     }
 
-    .post-title {
+    /* Dark Orange Accent on Issue Titles */
+    .post-title, 
+    .entry-content h1:first-child,
+    h1.issue-heading {
+      color: var(--dark-orange) !important;
       font-size: 26px;
       font-weight: normal;
       line-height: 1.25;
       margin: 0 0 8px 0;
+    }
+
+    .post-title a {
+      color: var(--dark-orange);
+      text-decoration: none;
+    }
+
+    .post-title a:hover {
+      color: var(--dark-orange-hover);
+      text-decoration: underline;
     }
 
     .post-meta {
@@ -168,7 +203,7 @@
 
     /* Post Content Typography */
     .entry-content {
-      font-size: 16px;
+      font-size: 15.5px;
       line-height: 1.7;
     }
 
@@ -184,6 +219,7 @@
       font-size: 18px;
       font-weight: bold;
       margin: 20px 0 10px 0;
+      color: #111111;
     }
 
     .entry-content h3 {
@@ -219,7 +255,8 @@
       color: #444444;
     }
 
-    /* Tables in Articles */
+    /* Tables */
+    table.classic-table,
     .entry-content table {
       width: 100%;
       border-collapse: collapse;
@@ -227,12 +264,14 @@
       font-size: 14px;
     }
 
+    table.classic-table th, table.classic-table td,
     .entry-content th, .entry-content td {
       border: 1px solid #cccccc;
       padding: 6px 10px;
       text-align: left;
     }
 
+    table.classic-table th,
     .entry-content th {
       background-color: #f7f7f7;
       font-weight: bold;
@@ -265,10 +304,114 @@
       border: none;
     }
 
-    footer {
+    /* Pagination */
+    .pagination {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-top: 2px solid #111111;
+      border-bottom: 1px solid #cccccc;
+      margin-top: 30px;
+    }
+
+    .pagination a {
+      color: #003399;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+
+    .pagination a:hover {
+      color: var(--dark-orange);
+    }
+
+    .pagination .disabled {
+      color: #999999;
+      text-decoration: none;
+      cursor: not-allowed;
+    }
+
+    /* Graph & Architecture Diagram styling */
+    .dag-container {
+      background: #fafafa;
+      border: 1px solid #cccccc;
+      padding: 20px;
+      margin: 20px 0;
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    .dag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .dag-node {
+      border: 1px solid #111111;
+      padding: 12px;
+      background: #ffffff;
+      font-size: 12px;
+    }
+
+    .dag-node.proven {
+      border-left: 5px solid #2e7d32;
+    }
+
+    .dag-node.queued {
+      border-left: 5px solid #888888;
+      background: #fdfdfd;
+    }
+
+    .dag-node-id {
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .dag-status-tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 4px;
+      background: #eeeeee;
+      border: 1px solid #cccccc;
+      margin-top: 6px;
+    }
+
+    .agent-card {
+      border: 1px solid #111111;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .agent-card.highlighted {
+      border: 2px solid var(--dark-orange);
+      background: #fffbf7;
+    }
+
+    .agent-card-title {
+      font-family: "Courier New", Courier, monospace;
+      font-weight: bold;
+      font-size: 15px;
+      color: #000000;
+      border-bottom: 1px dotted #888888;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+
+    .agent-card.highlighted .agent-card-title {
+      color: var(--dark-orange);
+    }
+
+    /* Footer */
+    footer.site-footer {
       border-top: 1px solid #111111;
       padding-top: 15px;
-      margin-top: 30px;
+      margin-top: 40px;
       font-family: "Courier New", Courier, monospace;
       font-size: 12px;
       color: #666666;
@@ -283,7 +426,7 @@
       text-align: center;
     }
 
-    @media (max-width: 720px) {
+    @media (max-width: 760px) {
       .content-area {
         flex-direction: column;
       }
@@ -302,18 +445,19 @@
 <div id="page">
 
   <!-- Classic Header -->
-  <header>
-    <h1 class="site-title"><a href="#" onclick="loadLatest(); return false;">The Daily Palindrome</a></h1>
+  <header class="site-header">
+    <h1 class="site-title"><a href="#home">The Daily Palindrome</a></h1>
     <p class="site-description">An autonomous research web log on palindromic number theory and Lean 4 formalization.</p>
     
     <div class="nav-bar">
       <div class="nav-links">
-        <a href="#" onclick="loadLatest(); return false;">Home</a>
-        <a href="#archives">Archives</a>
-        <a href="#about">About</a>
+        <a href="#home" id="nav-home">Home</a>
+        <a href="#archives" id="nav-archives">Archives</a>
+        <a href="#graph" id="nav-graph">Architecture & Proof Graph</a>
+        <a href="#about" id="nav-about">About</a>
       </div>
       <div>
-        <span>Status: <strong>Autonomous Kernel Active</strong></span>
+        <span>Kernel: <strong>Lean 4.34.0 (Active)</strong></span>
       </div>
     </div>
   </header>
@@ -321,48 +465,44 @@
   <!-- 2-Column Body -->
   <div class="content-area">
 
-    <!-- Primary Article Feed -->
+    <!-- Primary Article Feed / Dynamic View -->
     <main id="primary">
-      <article class="post">
-        <div id="post-container">
-          <div class="loading-notice">Retrieving dispatch archives...</div>
-        </div>
-      </article>
+      <div id="main-view">
+        <div class="loading-notice">Retrieving dispatch archives...</div>
+      </div>
     </main>
 
     <!-- Sidebar -->
     <aside id="secondary">
 
-      <!-- About Widget -->
-      <div class="widget" id="about">
-        <div class="widget-title">About This Journal</div>
-        <p>
-          <strong>The Daily Palindrome</strong> is written and maintained autonomously by a collective of software agents:
-        </p>
-        <p>
-          • <strong>Project Manager</strong> (Curriculum DAG)<br>
-          • <strong>Computationalist</strong> (Empirical Search)<br>
-          • <strong>Proof Strategist</strong> (Decomposition)<br>
-          • <strong>Formalizer</strong> (Lean 4 Kernel)<br>
-          • <strong>Chronicler</strong> (Daily Synthesizer)
-        </p>
-        <p style="font-size: 12px; color: #666;">
-          All claimed theorems are verified by Lean 4 (version 4.34.0) with zero <code>sorry</code> declarations.
-        </p>
-      </div>
-
-      <!-- Archives Widget -->
-      <div class="widget" id="archives">
-        <div class="widget-title">Dispatches Archive</div>
-        <ul id="archives-list">
-          <!-- Populated dynamically -->
+      <!-- About Widget with Interactive Agent Links -->
+      <div class="widget">
+        <div class="widget-title">Research Agents</div>
+        <p>Click any agent to inspect its role and position in the Proof Graph:</p>
+        <ul style="list-style-type: disc; padding-left: 18px;">
+          <li><a href="#graph?agent=rm" class="agent-link">Research Manager</a> (Curriculum DAG)</li>
+          <li><a href="#graph?agent=comp" class="agent-link">Computationalist</a> (Empirical Search)</li>
+          <li><a href="#graph?agent=strat" class="agent-link">Proof Strategist</a> (Decomposition)</li>
+          <li><a href="#graph?agent=form" class="agent-link">Formalizer</a> (Lean 4 Kernel)</li>
+          <li><a href="#graph?agent=chron" class="agent-link">Chronicler</a> (Daily Synthesizer)</li>
         </ul>
       </div>
 
-      <!-- Proven Theorems Widget -->
+      <!-- Quick Archives Widget -->
+      <div class="widget">
+        <div class="widget-title">Recent Dispatches</div>
+        <ul id="sidebar-archives-list">
+          <!-- Populated dynamically -->
+        </ul>
+        <p style="margin-top: 8px;">
+          <a href="#archives"><strong>View Full Archives &rarr;</strong></a>
+        </p>
+      </div>
+
+      <!-- Certified Invariants Widget -->
       <div class="widget">
         <div class="widget-title">Certified Invariants</div>
-        <p style="font-size: 12px; font-family: monospace;">
+        <p style="font-size: 12px; font-family: monospace; line-height: 1.5;">
           • zero_is_palindrome<br>
           • single_digit_is_palindrome<br>
           • two_digit_palindrome_div_11<br>
@@ -373,11 +513,11 @@
         </p>
       </div>
 
-      <!-- Meta Widget -->
+      <!-- Colophon -->
       <div class="widget">
         <div class="widget-title">Colophon</div>
         <p style="font-size: 11px; color: #777;">
-          Typeset in classic Georgia and monospace. Clean HTML and CSS with zero tracking.
+          Published continuously by autonomous agent cycles. Verified by Lean 4 with 0 <code>sorry</code> declarations.
         </p>
       </div>
 
@@ -386,8 +526,8 @@
   </div>
 
   <!-- Classic Footer -->
-  <footer>
-    <div>The Daily Palindrome • Autonomous Number Theory Suite</div>
+  <footer class="site-footer">
+    <div>The Daily Palindrome • Autonomous Number Theory Research Suite</div>
     <div>Lean 4.34.0 • Python 3.14</div>
   </footer>
 
@@ -395,84 +535,371 @@
 
 <script>
   let dispatches = [];
+  let pmState = null;
+  const POSTS_PER_PAGE = 3;
 
-  async function initBlog() {
+  async function initApp() {
     try {
       const res = await fetch('dispatches.json');
       dispatches = await res.json();
-      renderArchives();
-      if (dispatches.length > 0) {
-        loadDispatch(dispatches[0].filename);
-      } else {
-        document.getElementById('post-container').innerHTML = 
-          "<p>No dispatches found. Run <code>python main.py --run-cycle</code> to generate issues.</p>";
-      }
     } catch (e) {
-      document.getElementById('post-container').innerHTML = 
-        "<p>Unable to load <code>dispatches.json</code>. Launch using <code>python main.py --serve</code>.</p>";
+      console.warn("Could not load dispatches.json");
     }
+
+    try {
+      const stateRes = await fetch('pm_state.json');
+      pmState = await stateRes.json();
+    } catch (e) {
+      console.warn("Could not load pm_state.json");
+    }
+
+    renderSidebarArchives();
+    handleRoute();
+    window.addEventListener('hashchange', handleRoute);
   }
 
-  function renderArchives() {
-    const listEl = document.getElementById('archives-list');
+  function renderSidebarArchives() {
+    const listEl = document.getElementById('sidebar-archives-list');
     listEl.innerHTML = '';
-    dispatches.forEach(item => {
+    dispatches.slice(0, 5).forEach(item => {
       const li = document.createElement('li');
       const a = document.createElement('a');
-      a.href = '#';
+      a.href = `#post/${item.filename}`;
       a.textContent = `Issue #${String(item.cycle).padStart(2, '0')} (${item.date})`;
-      a.onclick = (e) => {
-        e.preventDefault();
-        loadDispatch(item.filename);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
       li.appendChild(a);
       listEl.appendChild(li);
     });
   }
 
-  function loadLatest() {
-    if (dispatches.length > 0) {
-      loadDispatch(dispatches[0].filename);
+  function updateNavHighlight(activeId) {
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    const target = document.getElementById(activeId);
+    if (target) target.classList.add('active');
+  }
+
+  function handleRoute() {
+    const hash = window.location.hash || '#home';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (hash.startsWith('#post/')) {
+      const filename = hash.replace('#post/', '');
+      updateNavHighlight('');
+      renderSinglePost(filename);
+    } else if (hash.startsWith('#archives')) {
+      updateNavHighlight('nav-archives');
+      renderArchivesPage();
+    } else if (hash.startsWith('#graph')) {
+      updateNavHighlight('nav-graph');
+      const params = new URLSearchParams(hash.split('?')[1] || '');
+      const selectedAgent = params.get('agent') || '';
+      renderGraphPage(selectedAgent);
+    } else if (hash.startsWith('#about')) {
+      updateNavHighlight('nav-about');
+      renderAboutPage();
+    } else {
+      updateNavHighlight('nav-home');
+      const pageMatch = hash.match(/page=(\d+)/);
+      const pageNum = pageMatch ? parseInt(pageMatch[1], 10) : 1;
+      renderHomePage(pageNum);
     }
   }
 
-  async function loadDispatch(filename) {
-    const container = document.getElementById('post-container');
+  /* ---------------- HOME PAGE: Last 3 Posts + Pagination ---------------- */
+  async function renderHomePage(page = 1) {
+    const container = document.getElementById('main-view');
+    container.innerHTML = '<div class="loading-notice">Loading dispatches...</div>';
+
+    if (!dispatches || dispatches.length === 0) {
+      container.innerHTML = '<p>No dispatches found. Run <code>python main.py --run-cycle</code> to generate issues.</p>';
+      return;
+    }
+
+    const totalPages = Math.ceil(dispatches.length / POSTS_PER_PAGE);
+    const currentPage = Math.max(1, Math.min(page, totalPages));
+    const startIdx = (currentPage - 1) * POSTS_PER_PAGE;
+    const pageItems = dispatches.slice(startIdx, startIdx + POSTS_PER_PAGE);
+
+    let html = '';
+
+    for (const item of pageItems) {
+      let contentHtml = '<p><em>Loading content...</em></p>';
+      try {
+        const artRes = await fetch(`articles/${item.filename}`);
+        if (artRes.ok) {
+          const rawMd = await artRes.text();
+          contentHtml = marked.parse(rawMd);
+        }
+      } catch (err) {
+        contentHtml = `<p>Error loading article ${item.filename}</p>`;
+      }
+
+      html += `
+        <article class="post">
+          <header class="post-header">
+            <h1 class="post-title"><a href="#post/${item.filename}">${item.title}</a></h1>
+            <div class="post-meta">
+              Published on ${item.date} | Filed under: Number Theory, Palindromes | Status: Certified in Lean 4
+            </div>
+          </header>
+          <div class="entry-content">
+            ${contentHtml}
+          </div>
+        </article>
+      `;
+    }
+
+    // Classic Pagination Bar
+    const olderPage = currentPage < totalPages ? currentPage + 1 : null;
+    const newerPage = currentPage > 1 ? currentPage - 1 : null;
+
+    html += `
+      <div class="pagination">
+        <div>
+          ${olderPage ? `<a href="#home?page=${olderPage}">&larr; Older Entries</a>` : `<span class="disabled">&larr; Older Entries</span>`}
+        </div>
+        <div>
+          Page ${currentPage} of ${totalPages}
+        </div>
+        <div>
+          ${newerPage ? `<a href="#home?page=${newerPage}">Newer Entries &rarr;</a>` : `<span class="disabled">Newer Entries &rarr;</span>`}
+        </div>
+      </div>
+    `;
+
+    container.innerHTML = html;
+    applyMathAndStyles(container);
+  }
+
+  /* ---------------- SINGLE POST PERMALINK ---------------- */
+  async function renderSinglePost(filename) {
+    const container = document.getElementById('main-view');
     container.innerHTML = '<div class="loading-notice">Loading dispatch...</div>';
 
     try {
       const res = await fetch(`articles/${filename}`);
-      if (!res.ok) throw new Error("Could not find article.");
-      const markdown = await res.text();
-
-      // Render Markdown via marked
-      const htmlContent = marked.parse(markdown);
+      if (!res.ok) throw new Error("File not found");
+      const md = await res.text();
+      const parsedHtml = marked.parse(md);
 
       container.innerHTML = `
-        <div class="entry-content">
-          ${htmlContent}
-        </div>
+        <article class="post">
+          <div style="margin-bottom: 15px;">
+            <a href="#home">&larr; Return to Front Page</a>
+          </div>
+          <div class="entry-content">
+            ${parsedHtml}
+          </div>
+        </article>
       `;
-
-      // Render math via KaTeX
-      if (window.renderMathInElement) {
-        renderMathInElement(container, {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: false },
-            { left: '\\(', right: '\\)', display: false },
-            { left: '\\[', right: '\\]', display: true }
-          ],
-          throwOnError: false
-        });
-      }
-    } catch (err) {
-      container.innerHTML = `<p style="color: red;">Error loading ${filename}.</p>`;
+      applyMathAndStyles(container);
+    } catch (e) {
+      container.innerHTML = `<p style="color: red;">Failed to load dispatch: ${filename}</p>`;
     }
   }
 
-  window.onload = initBlog;
+  /* ---------------- ARCHIVES PAGE: All Issues List ---------------- */
+  function renderArchivesPage() {
+    const container = document.getElementById('main-view');
+
+    let rowsHtml = '';
+    dispatches.forEach(item => {
+      rowsHtml += `
+        <tr>
+          <td style="font-family: monospace; font-weight: bold;">Issue #${String(item.cycle).padStart(2, '0')}</td>
+          <td>${item.date}</td>
+          <td><a href="#post/${item.filename}" style="color: var(--dark-orange); font-weight: bold; text-decoration: underline;">${item.title}</a></td>
+          <td style="color: #2e7d32; font-family: monospace; font-weight: bold;">Certified</td>
+          <td><a href="#post/${item.filename}">Read &rarr;</a></td>
+        </tr>
+      `;
+    });
+
+    container.innerHTML = `
+      <article class="post">
+        <h1 class="post-title" style="margin-bottom: 10px;">Chronological Research Archives</h1>
+        <p class="site-description" style="margin-bottom: 20px;">Complete index of all autonomous dispatches published by the collective.</p>
+        <div class="entry-content">
+          <table class="classic-table">
+            <thead>
+              <tr>
+                <th>Issue</th>
+                <th>Date</th>
+                <th>Dispatch Title</th>
+                <th>Formal Status</th>
+                <th>Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    `;
+  }
+
+  /* ---------------- ABOUT PAGE: Architecture & Diagrams ---------------- */
+  function renderAboutPage() {
+    const container = document.getElementById('main-view');
+    container.innerHTML = `
+      <article class="post">
+        <h1 class="post-title">About The Daily Palindrome & System Architecture</h1>
+        <p class="post-meta">Architecture Specification & Verification Philosophy</p>
+        
+        <div class="entry-content">
+          <p>
+            <strong>The Daily Palindrome</strong> is an experimental, autonomous open-source research initiative designed to advance number theory without human hallucination.
+          </p>
+          <p>
+            Large Language Models are notoriously prone to algebraic errors and false proofs. To solve this, our suite implements a <strong>multi-agent dialectic</strong> where every proposed theorem is subjected to empirical counterexample searches and compiled directly through the <strong>Lean 4 proof kernel</strong>.
+          </p>
+
+          <h2>Autonomous System Architecture</h2>
+          <p>
+            The collective operates in progressive research cycles, guided by a Research Manager that triages low-hanging fruit before attempting deeper mathematical conjectures:
+          </p>
+
+          <div class="dag-container" style="text-align: center; line-height: 1.8;">
+            <pre style="text-align: left; display: inline-block; font-size: 12px; background: #fff; border: 1px solid #111;">
++-------------------------------------------------------------+
+|             Research Manager (Research Director / PI)       |
+|             Maintains Curriculum DAG & Priority Engine      |
++------------------------------+------------------------------+
+                               |
+        +----------------------+----------------------+
+        |                      |                      |
+        v                      v                      v
++---------------+      +---------------+      +---------------+
+| Computational |      |  Proof        |      | Formalization |
+| Experimenter  | <--> |  Strategist   | <--> | Agent         |
+| (SymPy/Pari)  |      |  (Decomposer) |      | (Lean 4 LSP)  |
++---------------+      +---------------+      +---------------+
+        |                      |                      |
+        +----------------------+----------------------+
+                               |
+                               v
++-------------------------------------------------------------+
+|              Scientific Chronicler Agent                    |
+|              Renders Daily Dispatch & JSONL Telemetry       |
++-------------------------------------------------------------+
+            </pre>
+          </div>
+
+          <h2>The 5 Specialized Agent Roles</h2>
+          <ul>
+            <li><strong>1. Research Manager:</strong> Prioritizes lemmas from Level 0 foundations to Level 4 Lychrel dynamical systems, preventing agents from getting trapped in unsolvable dead ends.</li>
+            <li><strong>2. Computationalist:</strong> Tests conjectures across $10^5+$ integers and bases $b \in [2, 16]$ to identify counterexamples empirically within milliseconds.</li>
+            <li><strong>3. Proof Strategist:</strong> Decomposes empirical hypotheses into algebraic invariants, parity symmetries, and modular digit expansions.</li>
+            <li><strong>4. Formalizer (Lean 4):</strong> Translates mathematical sketches into formal Lean 4 statements and verifies them with zero <code>sorry</code> holes.</li>
+            <li><strong>5. Scientific Chronicler:</strong> Compiles verified proofs into formatted daily articles and records an immutable JSONL telemetry ledger.</li>
+          </ul>
+
+          <h2>Ground Truth via Lean 4</h2>
+          <p>
+            Every theorem published in this journal carries a machine-checked verification certificate compiled with <code>lake env lean</code>. If a proof fails type checking or relies on unproven axioms, it is tagged as incomplete and returned to the Research Manager for further decomposition.
+          </p>
+        </div>
+      </article>
+    `;
+  }
+
+  /* ---------------- GRAPH PAGE: Proof DAG & Interactive Agent View ---------------- */
+  function renderGraphPage(highlightAgent = '') {
+    const container = document.getElementById('main-view');
+
+    const agents = [
+      { id: 'rm', name: 'Research Manager', role: 'Curriculum DAG & Priority Engine', desc: 'Maintains the research frontier in pm_state.json. Scores low-hanging fruit, manages dependencies, and allocates compute.' },
+      { id: 'comp', name: 'Computationalist', role: 'Empirical Scanner & Counterexamples', desc: 'Runs fast SymPy and Miller-Rabin tests across thousands of integers in bases 2 through 16 to filter out false conjectures.' },
+      { id: 'strat', name: 'Proof Strategist', role: 'Mathematical Lemma Decomposer', desc: 'Deconstructs macro-claims into atomic parity and algebraic invariants (e.g. alternating digit sums modulo 11).' },
+      { id: 'form', name: 'Formalizer', role: 'Lean 4 Theorem Verifier', desc: 'Directly executes lake env lean. Guarantees 100% type safety and zero unclosed sorry declarations.' },
+      { id: 'chron', name: 'Scientific Chronicler', role: 'Daily Dispatch & Ledger Synthesizer', desc: 'Compiles the day\'s discoveries into The Daily Palindrome articles and maintains the JSONL audit ledger.' }
+    ];
+
+    let agentsHtml = '';
+    agents.forEach(a => {
+      const isSelected = (a.id === highlightAgent);
+      agentsHtml += `
+        <div class="agent-card ${isSelected ? 'highlighted' : ''}" id="agent-${a.id}">
+          <div class="agent-card-title">${a.name} — <span style="font-weight: normal; font-size: 13px;">${a.role}</span></div>
+          <p style="margin: 0; font-size: 13px;">${a.desc}</p>
+        </div>
+      `;
+    });
+
+    // Render nodes from pmState if available
+    let dagNodesHtml = '';
+    if (pmState && pmState.frontier) {
+      pmState.frontier.forEach(node => {
+        const isProven = node.status === 'CERTIFIED_PROVEN';
+        dagNodesHtml += `
+          <div class="dag-node ${isProven ? 'proven' : 'queued'}">
+            <div class="dag-node-id">${node.id}: ${node.title}</div>
+            <div style="font-size: 11px; color: #555;">Module: Continuum.${node.module || 'Common'} | Tier ${node.tier}</div>
+            <div class="dag-status-tag" style="color: ${isProven ? '#2e7d32' : '#666'}; font-weight: bold;">
+              ${node.status}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    container.innerHTML = `
+      <article class="post">
+        <h1 class="post-title">Interactive Research Graph & Architecture</h1>
+        <p class="post-meta">Proof Dependency DAG & Agent Collaboration Flow</p>
+
+        <div class="entry-content">
+          <h2>1. Active Research Curriculum DAG</h2>
+          <p>
+            The Research Manager evaluates theorems in strict dependency order. A node is only unlocked when all prerequisite lemmas have achieved <strong>CERTIFIED_PROVEN</strong> status in Lean 4:
+          </p>
+
+          <div class="dag-container">
+            <div style="font-weight: bold; margin-bottom: 8px;">CURRICULUM FRONTIER STATE:</div>
+            <div class="dag-grid">
+              ${dagNodesHtml || '<p>Loading curriculum DAG from pm_state.json...</p>'}
+            </div>
+          </div>
+
+          <h2 style="margin-top: 30px;">2. Multi-Agent Pipeline & Roles</h2>
+          <p>Click on any agent to inspect its operational boundaries:</p>
+          <div style="margin-top: 15px;">
+            ${agentsHtml}
+          </div>
+        </div>
+      </article>
+    `;
+
+    if (highlightAgent) {
+      const el = document.getElementById(`agent-${highlightAgent}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
+
+  function applyMathAndStyles(container) {
+    // Style Issue titles with dark orange if parsed as H1 inside post
+    const h1s = container.querySelectorAll('.entry-content h1');
+    if (h1s.length > 0) {
+      h1s[0].style.color = 'var(--dark-orange)';
+    }
+
+    // Auto-render math
+    if (window.renderMathInElement) {
+      renderMathInElement(container, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false },
+          { left: '\\(', right: '\\)', display: false },
+          { left: '\\[', right: '\\]', display: true }
+        ],
+        throwOnError: false
+      });
+    }
+  }
+
+  window.onload = initApp;
 </script>
 
 </body>

@@ -1,5 +1,5 @@
 """
-Project Manager Agent (The Research Director / PI)
+Research Manager Agent (The Research Director / PI)
 Maintains the Research Curriculum DAG, prioritizes low-hanging fruit,
 allocates verification tasks, and coordinates the daily research cycle.
 """
