@@ -139,21 +139,25 @@ DEFAULT_CURRICULUM = {
         },
         {
             "id": "CONJ-002",
-            "title": "Palindromic Squares: Carrieless squares (10^k + 1)^2 preserve palindromicity",
+            "title": "Carrieless square identity for (10^k + 1)^2",
             "tier": 2,
             "status": "QUEUED_DEFERRED",
-            "type": "conjecture",
+            "type": "lemma",
             "module": "Powers",
-            "dependencies": ["DEF-001", "LEMMA-001"]
+            "lemma_name": "carrieless_square_identity",
+            "dependencies": ["DEF-001", "LEMMA-001"],
+            "empirical_task": {"type": "carrieless_square_check", "base": 10, "max_exponent": 8}
         },
         {
             "id": "CONJ-003",
-            "title": "Additive 3-Palindrome Decomposition for small integers",
+            "title": "Single-digit numbers are sums of three base-b palindromes",
             "tier": 3,
             "status": "QUEUED_DEFERRED",
-            "type": "conjecture",
+            "type": "lemma",
             "module": "Additive",
-            "dependencies": ["LEMMA-001", "LEMMA-002"]
+            "lemma_name": "single_digit_sum_three_palindromes",
+            "dependencies": ["LEMMA-000"],
+            "empirical_task": {"type": "single_digit_three_palindrome_sum"}
         }
     ],
     "proven_knowledge_base": [],

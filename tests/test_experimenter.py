@@ -34,6 +34,18 @@ class ExperimenterTests(unittest.TestCase):
         self.assertTrue(result["verified_empirically"])
         self.assertEqual(result["primes_found"], [11])
 
+    def test_carrieless_square_family_in_base_ten(self):
+        result = Experimenter().test_carrieless_square_identity(10, 8)
+        self.assertTrue(result["verified_empirically"], result)
+        self.assertEqual(result["tested_count"], 8)
+        self.assertEqual(result["counterexamples_found"], 0)
+
+    def test_single_digits_have_constructive_three_palindrome_decompositions(self):
+        result = Experimenter().test_single_digit_three_palindrome_sum()
+        self.assertTrue(result["verified_empirically"], result)
+        self.assertEqual(result["tested_count"], 120)
+        self.assertEqual(result["counterexamples_found"], 0)
+
     def test_invalid_base_is_rejected(self):
         with self.assertRaises(ValueError):
             digits_in_base(12, 1)

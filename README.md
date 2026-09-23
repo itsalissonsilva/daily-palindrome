@@ -6,39 +6,14 @@ The system deliberately separates evidence from proof. A successful numerical se
 
 ## Architecture
 
-### Responsibility topology
-
-The Project Manager owns the curriculum and delegates work to specialist roles. Their outputs converge in the Chronicler, which produces the public research record.
-
-```mermaid
-flowchart TB
-    PM["Research Manager<br/>Curriculum DAG"]
-    EXP["Computationalist<br/>Empirical search"]
-    STRAT["Proof Strategist<br/>Decomposition"]
-    FORM["Formalizer<br/>Lean 4 kernel"]
-    CHRON["Chronicler<br/>Volumes, outlooks, and telemetry"]
-
-    PM --> EXP
-    PM --> STRAT
-    PM --> FORM
-    EXP --> CHRON
-    STRAT --> CHRON
-    FORM --> CHRON
-```
-
-This diagram describes ownership. Within one candidate run, the stages are gated and execute in order:
+The pipeline is a short, gated research loop. Each stage receives a typed record from the stage before it; numerical evidence can stop a weak claim, while only Lean verification can certify one.
 
 ```mermaid
 flowchart LR
-    A["Validate state<br/>and build Lean project"] --> B["Select dependency-ready<br/>QUEUED candidates"]
-    B --> C["Search for<br/>counterexamples"]
-    C -->|evidence supports candidate| D["Create typed<br/>proof plan"]
-    C -->|counterexample| X["Record result<br/>and stop"]
-    D -->|target matches curriculum| E["Verify exact Lean<br/>declaration and axioms"]
-    D -->|target mismatch| Y["Reject proof plan"]
-    E -->|certificate accepted| F["Add to proven<br/>knowledge base"]
-    E -->|verification fails| Z["Record retry or<br/>review state"]
-    F --> G["Publish dispatch,<br/>site data, and telemetry"]
+    A[Curriculum] --> B[Counterexample search]
+    B --> C[Proof plan]
+    C --> D[Lean check]
+    D --> E[Published volume]
 ```
 
 ### Components
@@ -60,24 +35,12 @@ flowchart LR
 
 Only `QUEUED` items with proven dependencies are selected automatically. Deferred, blocked, or failed work requires an explicit activation or retry, preventing an unattended loop from repeatedly consuming the same bad task.
 
-```mermaid
-flowchart TD
-    Q[QUEUED] --> P[IN_PROGRESS]
-    Q --> D[QUEUED_DEFERRED]
-    Q --> B[BLOCKED]
-    D -->|activate| Q
-    B -->|activate| Q
-    P --> C[CERTIFIED_PROVEN]
-    P --> CE[COUNTEREXAMPLE_FOUND]
-    P --> FR[FAILED_RETRYABLE]
-    P --> FP[FAILED_PERMANENT]
-    P --> I[INCOMPLETE]
-    P --> B
-    FR -->|explicit retry| Q
-    FP -->|explicit retry| Q
-    I -->|explicit retry| Q
-    CE -->|explicit retry| Q
-```
+| Lifecycle group | Meaning |
+| --- | --- |
+| Queued | Ready when every dependency is proven |
+| In progress | Passing through experiment, strategy, and verification gates |
+| Proven | Exact Lean declaration and allowed axioms were verified |
+| Stopped | Deferred, blocked, disproved, incomplete, or awaiting explicit retry |
 
 State files and generated indexes are written atomically. Corrupt state is reported rather than silently replaced. Each cycle also receives a unique run ID so its events can be correlated in `logs/research_log.jsonl`.
 
@@ -103,24 +66,17 @@ This is stronger than treating a successful module build as proof that a particu
 
 ```mermaid
 flowchart LR
-    STATE[pm_state.json] --> PM[Research cycle]
-    LEAN[formal/Continuum/*.lean] --> PM
-    PM --> LOG[logs/research_log.jsonl]
-    PM --> MD[dispatches/volume_*.md]
-    PM --> WEEKLY[Sunday weekly outlook]
-    ROADMAP[Launch roadmap] --> SYNC
-    MD --> SYNC[Chronicler sync]
-    WEEKLY --> SYNC
-    STATE --> SYNC
-    SYNC --> ARTICLES[site/articles/*.md]
-    SYNC --> INDEX[site/dispatches.json]
-    SYNC --> GRAPH[site/pm_state.json]
-    ARTICLES --> WEB[Static blog]
-    INDEX --> WEB
-    GRAPH --> WEB
+    A[State + Lean] --> B[Research pipeline]
+    B --> C[Dispatches]
+    B --> D[Telemetry]
+    C --> E[Static blog]
 ```
 
 The browser renders Markdown dispatches and mathematical notation, while the archives and research graph are driven by generated JSON. Article routes are allowlisted from `dispatches.json`, and rendered Markdown is sanitized before insertion into the page.
+
+## Research roadmap
+
+The launch roadmap progresses through foundations, divisibility, prime consequences, pattern families, and additive questions. Phase VI develops exact counting and distribution results for palindromes by length and base. Phase VII turns to arithmetic dynamics, beginning with bounded reverse-and-add trajectories and formal invariants where they can be proved.
 
 ## Repository layout
 

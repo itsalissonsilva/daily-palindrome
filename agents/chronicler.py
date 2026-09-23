@@ -200,7 +200,7 @@ class Chronicler:
         if open_conjectures:
             next_ids = [c.get("id", "?") for c in open_conjectures[:3]]
             parts.append(
-                f"The frontier currently tracks {len(open_conjectures)} incomplete conjecture{'s' if len(open_conjectures) != 1 else ''} "
+                f"The frontier currently tracks {len(open_conjectures)} incomplete curriculum item{'s' if len(open_conjectures) != 1 else ''} "
                 f"(`{'`, `'.join(next_ids)}`), including deferred and retry-required work."
             )
 
@@ -283,9 +283,9 @@ The **Computationalist** agent executed exhaustive searches to stress-test candi
 
         content += """---
 
-## 4. Active Research Frontier & Open Conjectures
+## 4. Active Research Frontier
 
-The **Research Manager** tracks the following incomplete hypotheses and their current lifecycle states:
+The **Research Manager** tracks the following incomplete curriculum items and their current lifecycle states:
 
 """
         for conj in open_conjectures:
@@ -297,6 +297,9 @@ The **Research Manager** tracks the following incomplete hypotheses and their cu
             content += f"* **`{conj.get('id')}`** [Tier {conj.get('tier')}]: {conj.get('title')}\n"
             content += f"  * *Prerequisites*: `{', '.join(conj.get('dependencies', []))}`\n"
             content += f"  * *Status*: `{display_status}`\n"
+
+        if not open_conjectures:
+            content += "No incomplete curriculum items remain after this cycle. The next frontier will be selected from the roadmap.\n"
 
         content += f"""
 

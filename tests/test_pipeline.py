@@ -78,6 +78,19 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(strategy["target_module"], "Common")
         self.assertEqual(strategy["target_declaration"], "single_digit_is_palindrome")
 
+    def test_new_frontier_items_have_specific_proof_strategies(self):
+        strategist = ProofStrategist()
+        powers = copy.deepcopy(DEFAULT_CURRICULUM["frontier"][-2])
+        additive = copy.deepcopy(DEFAULT_CURRICULUM["frontier"][-1])
+
+        powers_strategy = strategist.decompose(powers["id"], powers)
+        additive_strategy = strategist.decompose(additive["id"], additive)
+
+        self.assertEqual(powers_strategy["strategy_type"], "Polynomial Identity")
+        self.assertEqual(powers_strategy["target_declaration"], "carrieless_square_identity")
+        self.assertEqual(additive_strategy["strategy_type"], "Constructive Additive Witness")
+        self.assertEqual(additive_strategy["target_declaration"], "single_digit_sum_three_palindromes")
+
 
 class FormalizerInputTests(unittest.TestCase):
     def test_lean_identifier_injection_is_rejected(self):

@@ -2,7 +2,7 @@
   "project_name": "Research Collective",
   "schema_version": 1,
   "theme": "Palindromic Number Theory",
-  "current_cycle": 6,
+  "current_cycle": 8,
   "frontier": [
     {
       "id": "DEF-001",
@@ -179,35 +179,74 @@
     },
     {
       "id": "CONJ-002",
-      "title": "Palindromic Squares: Carrieless squares (10^k + 1)^2 preserve palindromicity",
+      "title": "Carrieless square identity for (10^k + 1)^2",
       "tier": 2,
-      "status": "PARTIAL_SORRY",
-      "type": "conjecture",
+      "status": "CERTIFIED_PROVEN",
+      "type": "lemma",
       "module": "Powers",
+      "lemma_name": "carrieless_square_identity",
       "dependencies": [
         "DEF-001",
         "LEMMA-001"
       ],
+      "empirical_task": {
+        "type": "carrieless_square_check",
+        "base": 10,
+        "max_exponent": 8
+      },
       "last_telemetry": {
-        "status": "ERROR",
-        "error": "File not found: C:\\Users\\Lenovo\\.gemini\\antigravity\\scratch\\palindrome-continuum\\formal\\Continuum\\Powers.lean"
+        "file": "Continuum\\Powers.lean",
+        "status": "CERTIFIED_PROVEN",
+        "return_code": 0,
+        "verified": true,
+        "target_module": "Powers",
+        "target_declaration": "carrieless_square_identity",
+        "qualified_declaration": "Continuum.carrieless_square_identity",
+        "source_sha256": "853d0597a78c543e44a487221916a60a8b0405c878dc483fea381677e368d06e",
+        "lean_toolchain": "leanprover/lean4:v4.34.0",
+        "axiom_report": "Continuum.carrieless_square_identity (k : Nat) : (10 ^ k + 1) ^ 2 = 10 ^ (2 * k) + 2 * 10 ^ k + 1\n'Continuum.carrieless_square_identity' depends on axioms: [propext, Quot.sound]",
+        "axioms": [
+          "propext",
+          "Quot.sound"
+        ],
+        "unexpected_axioms": [],
+        "uses_sorry_axiom": false,
+        "certificate_id": "6bc831c90e5560acfaceecd5422971f07e81c9b47243e69156662cc6d3f65bba"
       },
       "retry_count": 0
     },
     {
       "id": "CONJ-003",
-      "title": "Additive 3-Palindrome Decomposition for small integers",
+      "title": "Single-digit numbers are sums of three base-b palindromes",
       "tier": 3,
-      "status": "PARTIAL_SORRY",
-      "type": "conjecture",
+      "status": "CERTIFIED_PROVEN",
+      "type": "lemma",
       "module": "Additive",
+      "lemma_name": "single_digit_sum_three_palindromes",
       "dependencies": [
-        "LEMMA-001",
-        "LEMMA-002"
+        "LEMMA-000"
       ],
+      "empirical_task": {
+        "type": "single_digit_three_palindrome_sum"
+      },
       "last_telemetry": {
-        "status": "ERROR",
-        "error": "File not found: C:\\Users\\Lenovo\\.gemini\\antigravity\\scratch\\palindrome-continuum\\formal\\Continuum\\Additive.lean"
+        "file": "Continuum\\Additive.lean",
+        "status": "CERTIFIED_PROVEN",
+        "return_code": 0,
+        "verified": true,
+        "target_module": "Additive",
+        "target_declaration": "single_digit_sum_three_palindromes",
+        "qualified_declaration": "Continuum.single_digit_sum_three_palindromes",
+        "source_sha256": "13f04d1a2a4f7e98f8c700a9db62ee56c59e11cbacf4c11b7ea602a0d0d1351f",
+        "lean_toolchain": "leanprover/lean4:v4.34.0",
+        "axiom_report": "Continuum.single_digit_sum_three_palindromes (base n : Nat) (hbase : base \u00e2\u2030\u00a5 2) (hn_pos : n > 0) (hn_lt : n < base) :\n  \u00e2\u02c6\u0192 x y z, Continuum.IsPalindrome base x \u00e2\u02c6\u00a7 Continuum.IsPalindrome base y \u00e2\u02c6\u00a7 Continuum.IsPalindrome base z \u00e2\u02c6\u00a7 n = x + y + z\n'Continuum.single_digit_sum_three_palindromes' depends on axioms: [propext, Quot.sound]",
+        "axioms": [
+          "propext",
+          "Quot.sound"
+        ],
+        "unexpected_axioms": [],
+        "uses_sorry_axiom": false,
+        "certificate_id": "da7e8dd63d7a4a74495f978057d61f799f6f36a97f34cbe58322aaa521e11f86"
       },
       "retry_count": 0
     }
@@ -219,7 +258,32 @@
     "LEMMA-002",
     "LEMMA-003",
     "LEMMA-004",
-    "THM-001"
+    "THM-001",
+    "CONJ-002",
+    "CONJ-003"
   ],
-  "daily_cycles": []
+  "daily_cycles": [
+    {
+      "cycle": 6,
+      "run_id": "aaf09245-4019-432c-b960-1026604c3c49",
+      "started_at": "2026-09-23T17:10:42.564854+00:00",
+      "completed_at": "2026-09-23T17:10:48.622023+00:00",
+      "certified_items": [
+        "CONJ-002"
+      ],
+      "empirical_tests": 1,
+      "article": "volume_06_2026-09-23.md"
+    },
+    {
+      "cycle": 7,
+      "run_id": "747fa5fa-c403-4a85-9468-b092bad9e3f1",
+      "started_at": "2026-09-23T17:11:11.758152+00:00",
+      "completed_at": "2026-09-23T17:11:19.973630+00:00",
+      "certified_items": [
+        "CONJ-003"
+      ],
+      "empirical_tests": 1,
+      "article": "volume_07_2026-09-23.md"
+    }
+  ]
 }

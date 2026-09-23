@@ -28,7 +28,43 @@ class ProofStrategist:
             "target_declaration": target_declaration,
         }
         
-        if empirical_type == "even_length_divisibility" or "divisible by" in title.lower():
+        if empirical_type == "carrieless_square_check":
+            return common | {
+                "strategy_type": "Polynomial Identity",
+                "core_insight": (
+                    "Expand (10^k + 1)^2 by the binomial identity. The result is "
+                    "10^(2k) + 2*10^k + 1, whose separated coefficients explain the observed palindrome."
+                ),
+                "modular_lemmas": [
+                    {
+                        "id": hypothesis_id,
+                        "name": "carrieless_square_identity",
+                        "statement": "(10^k + 1)^2 = 10^(2*k) + 2*10^k + 1",
+                        "tactic_hint": "ring",
+                    }
+                ],
+                "recommended_module": "Continuum.Powers",
+            }
+
+        elif empirical_type == "single_digit_three_palindrome_sum":
+            return common | {
+                "strategy_type": "Constructive Additive Witness",
+                "core_insight": (
+                    "For a nonzero single digit n, choose the three palindromes n, 0, and 0. "
+                    "The existing single-digit and zero lemmas certify the witnesses."
+                ),
+                "modular_lemmas": [
+                    {
+                        "id": hypothesis_id,
+                        "name": "single_digit_sum_three_palindromes",
+                        "statement": "0 < n < b → ∃ x y z, pal x ∧ pal y ∧ pal z ∧ n = x + y + z",
+                        "tactic_hint": "refine witnesses n, 0, 0; omega",
+                    }
+                ],
+                "recommended_module": "Continuum.Additive",
+            }
+
+        elif empirical_type == "even_length_divisibility" or "divisible by" in title.lower():
             return common | {
                 "strategy_type": "Algebraic Parity Invariant",
                 "core_insight": (
