@@ -80,16 +80,24 @@ class StrategyTests(unittest.TestCase):
 
     def test_new_frontier_items_have_specific_proof_strategies(self):
         strategist = ProofStrategist()
-        powers = copy.deepcopy(DEFAULT_CURRICULUM["frontier"][-2])
-        additive = copy.deepcopy(DEFAULT_CURRICULUM["frontier"][-1])
+        by_id = {item["id"]: item for item in DEFAULT_CURRICULUM["frontier"]}
+        powers = copy.deepcopy(by_id["CONJ-002"])
+        additive = copy.deepcopy(by_id["CONJ-003"])
+        enumeration = copy.deepcopy(by_id["ENUM-001"])
 
         powers_strategy = strategist.decompose(powers["id"], powers)
         additive_strategy = strategist.decompose(additive["id"], additive)
+        enumeration_strategy = strategist.decompose(enumeration["id"], enumeration)
 
         self.assertEqual(powers_strategy["strategy_type"], "Polynomial Identity")
         self.assertEqual(powers_strategy["target_declaration"], "carrieless_square_identity")
         self.assertEqual(additive_strategy["strategy_type"], "Constructive Additive Witness")
         self.assertEqual(additive_strategy["target_declaration"], "single_digit_sum_three_palindromes")
+        self.assertEqual(enumeration_strategy["strategy_type"], "Factorization and Cancellation")
+        self.assertEqual(
+            enumeration_strategy["target_declaration"],
+            "two_digit_palindrome_constructor_injective",
+        )
 
 
 class FormalizerInputTests(unittest.TestCase):

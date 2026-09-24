@@ -28,7 +28,25 @@ class ProofStrategist:
             "target_declaration": target_declaration,
         }
         
-        if empirical_type == "carrieless_square_check":
+        if empirical_type == "two_digit_constructor_injective":
+            return common | {
+                "strategy_type": "Factorization and Cancellation",
+                "core_insight": (
+                    "Rewrite b*d + d as (b + 1)*d. Since b + 1 is positive, equality of two "
+                    "constructed values permits cancellation of the common factor."
+                ),
+                "modular_lemmas": [
+                    {
+                        "id": hypothesis_id,
+                        "name": "two_digit_palindrome_constructor_injective",
+                        "statement": "b*a + a = b*c + c → a = c for b ≥ 2",
+                        "tactic_hint": "factor with Nat.add_mul, then apply Nat.mul_left_cancel",
+                    }
+                ],
+                "recommended_module": "Continuum.Enumeration",
+            }
+
+        elif empirical_type == "carrieless_square_check":
             return common | {
                 "strategy_type": "Polynomial Identity",
                 "core_insight": (

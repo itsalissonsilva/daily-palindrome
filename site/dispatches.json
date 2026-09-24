@@ -1,6 +1,18 @@
 [
   {
     "kind": "volume",
+    "cycle": 8,
+    "volume": 8,
+    "label": "Vol. 08",
+    "status": "Certified",
+    "filename": "volume_08_2026-09-24.md",
+    "date": "2026-09-24",
+    "title": "The Daily Palindrome \u2014 Vol. 08",
+    "url": "articles/volume_08_2026-09-24.md",
+    "verified_lemmas": 1
+  },
+  {
+    "kind": "volume",
     "cycle": 7,
     "volume": 7,
     "label": "Vol. 07",

@@ -4,3 +4,4 @@ import Continuum.Common
 import Continuum.ParityDivisibility
 import Continuum.Powers
 import Continuum.Additive
+import Continuum.Enumeration

@@ -239,6 +239,45 @@ class Experimenter:
             "base": "2–16",
         }
 
+    def test_two_digit_constructor_injective(
+        self, min_base: int = 2, max_base: int = 16
+    ) -> Dict[str, Any]:
+        """Check that d ↦ b*d+d produces distinct two-digit palindromes."""
+        _validate_base(min_base)
+        if max_base < min_base:
+            raise ValueError("max_base must be at least min_base")
+
+        start_time = time.perf_counter()
+        tested_count = 0
+        counterexamples = []
+        samples = []
+        for base in range(min_base, max_base + 1):
+            values = []
+            for digit in range(1, base):
+                value = base * digit + digit
+                tested_count += 1
+                values.append(value)
+                if not is_palindrome(value, base):
+                    counterexamples.append(
+                        {"base": base, "digit": digit, "value": value, "reason": "not palindromic"}
+                    )
+
+            if len(set(values)) != len(values):
+                counterexamples.append({"base": base, "reason": "constructor collision"})
+            if len(samples) < 5:
+                samples.append({"base": base, "count": len(values), "values": values[:5]})
+
+        return {
+            "hypothesis": "Distinct nonzero digits construct distinct two-digit palindromes in each base",
+            "tested_count": tested_count,
+            "counterexamples_found": len(counterexamples),
+            "counterexamples": counterexamples,
+            "verified_empirically": not counterexamples,
+            "elapsed_seconds": round(time.perf_counter() - start_time, 4),
+            "samples": samples,
+            "base": f"{min_base}–{max_base}",
+        }
+
     def analyze_candidate(self, candidate_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Dispatcher for candidate hypotheses sent by PM."""
         task_type = payload.get("type")
@@ -272,6 +311,11 @@ class Experimenter:
             )
         elif task_type == "single_digit_three_palindrome_sum":
             result = self.test_single_digit_three_palindrome_sum()
+        elif task_type == "two_digit_constructor_injective":
+            result = self.test_two_digit_constructor_injective(
+                min_base=payload.get("min_base", 2),
+                max_base=payload.get("max_base", 16),
+            )
         else:
             return {"candidate_id": candidate_id, "error": f"Unknown task type: {task_type}"}
         result["candidate_id"] = candidate_id

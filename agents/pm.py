@@ -158,6 +158,21 @@ DEFAULT_CURRICULUM = {
             "lemma_name": "single_digit_sum_three_palindromes",
             "dependencies": ["LEMMA-000"],
             "empirical_task": {"type": "single_digit_three_palindrome_sum"}
+        },
+        {
+            "id": "ENUM-001",
+            "title": "The two-digit palindrome constructor is injective in every valid base",
+            "tier": 4,
+            "status": "QUEUED",
+            "type": "lemma",
+            "module": "Enumeration",
+            "lemma_name": "two_digit_palindrome_constructor_injective",
+            "dependencies": ["LEMMA-004"],
+            "empirical_task": {
+                "type": "two_digit_constructor_injective",
+                "min_base": 2,
+                "max_base": 16
+            }
         }
     ],
     "proven_knowledge_base": [],
