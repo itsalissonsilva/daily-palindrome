@@ -6,7 +6,7 @@ The system deliberately separates evidence from proof. A successful numerical se
 
 ## Architecture
 
-### Agent handoff topology
+### Agent graph topology
 
 The Research Manager selects dependency-ready work. A candidate then moves through the empirical, strategic, and formal gates in order before the Chronicler publishes the cycle record.
 
