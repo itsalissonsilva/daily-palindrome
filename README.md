@@ -6,25 +6,26 @@ The system deliberately separates evidence from proof. A successful numerical se
 
 ## Architecture
 
-### Responsibility topology
+### Agent handoff topology
 
-The Research Manager owns the curriculum and coordinates four specialist roles. Their outputs converge in the Chronicler, which maintains the public research record.
+The Research Manager selects dependency-ready work. A candidate then moves through the empirical, strategic, and formal gates in order before the Chronicler publishes the cycle record.
 
 ```mermaid
-flowchart TB
-    PM["Research Manager<br/>Curriculum DAG"]
-    EXP["Computationalist<br/>Empirical search"]
-    STRAT["Proof Strategist<br/>Decomposition"]
-    FORM["Formalizer<br/>Lean 4 kernel"]
-    CHRON["Chronicler<br/>Volumes, outlooks, and telemetry"]
+flowchart LR
+    PM["Research Manager<br/>Select ready item"]
+    EXP["Computationalist<br/>Counterexample gate"]
+    STRAT["Proof Strategist<br/>Exact proof plan"]
+    FORM["Formalizer<br/>Lean certificate"]
+    CHRON["Chronicler<br/>Volume and telemetry"]
 
-    PM --> EXP
-    PM --> STRAT
-    PM --> FORM
-    EXP --> CHRON
-    STRAT --> CHRON
-    FORM --> CHRON
+    PM -->|candidate| EXP
+    EXP -->|survives| STRAT
+    STRAT -->|module + declaration| FORM
+    FORM -->|verified outcome| CHRON
+    EXP -.->|counterexample or error| CHRON
 ```
+
+Failures skip the remaining proof gates but still reach the Chronicler as recorded research outcomes. Lifecycle state is updated at each gate.
 
 ### Gated research loop
 
@@ -35,10 +36,13 @@ flowchart LR
     A[Validate curriculum] --> B[Select ready work]
     B --> C[Empirical search]
     C -->|survives| D[Proof plan]
-    C -->|counterexample| X[Stop and record]
+    C -->|counterexample or error| X[Record stopped outcome]
     D --> E[Lean verification]
-    E -->|certified| F[Publish volume]
-    E -->|incomplete| R[Review or retry]
+    D -->|invalid target| X
+    E -->|certified| F[Update proven knowledge]
+    E -->|verification fails| X
+    F --> G[Publish volume and telemetry]
+    X --> G
 ```
 
 ### Components

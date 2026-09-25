@@ -814,17 +814,19 @@
 
           <h2>Autonomous System Architecture Diagram</h2>
           <p>
-            Below is the architectural flow connecting the five agents, the curriculum DAG, and the Lean 4 formalization kernel:
+            Each candidate advances through the five agents in sequence. A counterexample or failed gate skips the remaining proof stages and is still recorded as a research outcome.
           </p>
 
           <div class="diagram-box">
-            <svg viewBox="0 0 760 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 920 230" width="100%" height="auto" role="img" aria-label="Research Manager passes a candidate to the Computationalist, Proof Strategist, Formalizer, and Chronicler in sequence" xmlns="http://www.w3.org/2000/svg">
               <style>
                 .box { fill: #ffffff; stroke: #111111; stroke-width: 1.5; }
                 .box-highlight { fill: #fcfcfc; stroke: #111111; stroke-width: 2; }
-                .txt-title { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; fill: #111111; text-anchor: middle; }
-                .txt-sub { font-family: 'Georgia', serif; font-size: 11px; fill: #444444; text-anchor: middle; }
+                .txt-title { font-family: 'Courier New', monospace; font-size: 12px; font-weight: bold; fill: #111111; text-anchor: middle; }
+                .txt-sub { font-family: 'Georgia', serif; font-size: 10px; fill: #444444; text-anchor: middle; }
+                .txt-edge { font-family: 'Georgia', serif; font-size: 9px; fill: #555555; text-anchor: middle; }
                 .arrow { stroke: #111111; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+                .arrow-stop { stroke: #777777; stroke-width: 1.2; stroke-dasharray: 5,4; fill: none; marker-end: url(#arrowhead); }
               </style>
               <defs>
                 <marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
@@ -832,54 +834,53 @@
                 </marker>
               </defs>
 
-              <!-- Research Manager -->
-              <rect x="230" y="20" width="300" height="55" class="box-highlight" />
-              <text x="380" y="42" class="txt-title">RESEARCH MANAGER (PI)</text>
-              <text x="380" y="60" class="txt-sub">Curriculum DAG &amp; Priority Triage Engine</text>
+              <rect x="10" y="55" width="160" height="72" class="box-highlight" />
+              <text x="90" y="78" class="txt-title">RESEARCH MANAGER</text>
+              <text x="90" y="98" class="txt-sub">Curriculum DAG</text>
+              <text x="90" y="113" class="txt-sub">Selects ready work</text>
 
-              <!-- Fan-out to the three research stages -->
-              <line x1="380" y1="75" x2="380" y2="120" class="arrow" />
-              <line x1="120" y1="120" x2="640" y2="120" stroke="#111111" stroke-width="1.5" />
-              <line x1="120" y1="120" x2="120" y2="150" class="arrow" />
-              <line x1="380" y1="120" x2="380" y2="150" class="arrow" />
-              <line x1="640" y1="120" x2="640" y2="150" class="arrow" />
+              <rect x="195" y="55" width="160" height="72" class="box" />
+              <text x="275" y="78" class="txt-title">COMPUTATIONALIST</text>
+              <text x="275" y="98" class="txt-sub">Empirical search</text>
+              <text x="275" y="113" class="txt-sub">Counterexample gate</text>
 
-              <!-- Computationalist -->
-              <rect x="20" y="150" width="200" height="60" class="box" />
-              <text x="120" y="174" class="txt-title">COMPUTATIONALIST</text>
-              <text x="120" y="192" class="txt-sub">Empirical Scan &amp; Counterexamples</text>
+              <rect x="380" y="55" width="160" height="72" class="box" />
+              <text x="460" y="78" class="txt-title">PROOF STRATEGIST</text>
+              <text x="460" y="98" class="txt-sub">Exact module + declaration</text>
+              <text x="460" y="113" class="txt-sub">Proof plan</text>
 
-              <!-- Proof Strategist -->
-              <rect x="280" y="150" width="200" height="60" class="box" />
-              <text x="380" y="174" class="txt-title">PROOF STRATEGIST</text>
-              <text x="380" y="192" class="txt-sub">Lemma &amp; Parity Decomposition</text>
+              <rect x="565" y="55" width="160" height="72" class="box" />
+              <text x="645" y="78" class="txt-title">FORMALIZER</text>
+              <text x="645" y="98" class="txt-sub">Lean build + exact check</text>
+              <text x="645" y="113" class="txt-sub">Axiom certificate</text>
 
-              <!-- Formalizer Agent -->
-              <rect x="540" y="150" width="200" height="60" class="box" />
-              <text x="640" y="174" class="txt-title">FORMALIZER AGENT</text>
-              <text x="640" y="192" class="txt-sub">Lean 4 Kernel Verifier (lake build)</text>
+              <rect x="750" y="55" width="160" height="72" class="box-highlight" />
+              <text x="830" y="78" class="txt-title">CHRONICLER</text>
+              <text x="830" y="98" class="txt-sub">Volume + JSONL ledger</text>
+              <text x="830" y="113" class="txt-sub">Site indexes</text>
 
-              <!-- Convergence to Chronicler -->
-              <line x1="120" y1="210" x2="120" y2="245" stroke="#111111" stroke-width="1.5" />
-              <line x1="380" y1="210" x2="380" y2="245" stroke="#111111" stroke-width="1.5" />
-              <line x1="640" y1="210" x2="640" y2="245" stroke="#111111" stroke-width="1.5" />
-              <line x1="120" y1="245" x2="640" y2="245" stroke="#111111" stroke-width="1.5" />
-              <line x1="380" y1="245" x2="380" y2="275" class="arrow" />
+              <line x1="170" y1="91" x2="195" y2="91" class="arrow" />
+              <line x1="355" y1="91" x2="380" y2="91" class="arrow" />
+              <line x1="540" y1="91" x2="565" y2="91" class="arrow" />
+              <line x1="725" y1="91" x2="750" y2="91" class="arrow" />
 
-              <!-- Scientific Chronicler -->
-              <rect x="230" y="275" width="300" height="55" class="box-highlight" />
-              <text x="380" y="297" class="txt-title">SCIENTIFIC CHRONICLER</text>
-              <text x="380" y="315" class="txt-sub">The Daily Palindrome &amp; JSONL Ledger</text>
+              <text x="182" y="45" class="txt-edge">candidate</text>
+              <text x="367" y="45" class="txt-edge">survives</text>
+              <text x="552" y="45" class="txt-edge">exact target</text>
+              <text x="737" y="45" class="txt-edge">outcome</text>
+
+              <path d="M 275 127 C 330 195, 760 195, 815 127" class="arrow-stop" />
+              <text x="545" y="205" class="txt-edge">counterexamples and failed gates are recorded without being promoted</text>
             </svg>
           </div>
 
           <h2>The 5 Specialized Agent Roles</h2>
           <ul>
-            <li><strong>1. Research Manager:</strong> Prioritizes lemmas from Level 0 foundations to Level 4 Lychrel dynamical systems, preventing agents from getting trapped in unsolvable dead ends.</li>
-            <li><strong>2. Computationalist:</strong> Tests conjectures across $10^5+$ integers and bases $b \in [2, 16]$ to identify counterexamples empirically within milliseconds.</li>
-            <li><strong>3. Proof Strategist:</strong> Decomposes empirical hypotheses into algebraic invariants, parity symmetries, and modular digit expansions.</li>
+            <li><strong>1. Research Manager:</strong> Validates the curriculum DAG, selects dependency-ready work, and enforces lifecycle transitions.</li>
+            <li><strong>2. Computationalist:</strong> Runs bounded, task-specific searches across configured bases and stops candidates when it finds a counterexample.</li>
+            <li><strong>3. Proof Strategist:</strong> Maps surviving candidates to an exact Lean module, declaration, and proof plan.</li>
             <li><strong>4. Formalizer (Lean 4):</strong> Checks exact Lean 4 declarations and records their source hashes and axiom dependencies.</li>
-            <li><strong>5. Scientific Chronicler:</strong> Compiles verified proofs into formatted daily articles and records an append-only JSONL telemetry ledger.</li>
+            <li><strong>5. Scientific Chronicler:</strong> Publishes volumes and outlooks, synchronizes site indexes, and records the append-only JSONL telemetry ledger.</li>
           </ul>
 
           <h2>Ground Truth via Lean 4</h2>
@@ -899,11 +900,11 @@
     const dagClass = (...ids) => ids.every(isCertified) ? 'dag-box-green' : 'dag-box-gray';
 
     const agents = [
-      { id: 'rm', name: 'Research Manager', role: 'Curriculum DAG & Priority Engine', desc: 'Maintains the research frontier in pm_state.json. Scores low-hanging fruit, manages dependencies, and allocates compute.' },
-      { id: 'comp', name: 'Computationalist', role: 'Empirical Scanner & Counterexamples', desc: 'Uses arithmetic digit generation and Miller-Rabin tests across bases 2 through 16 to filter out false conjectures.' },
-      { id: 'strat', name: 'Proof Strategist', role: 'Mathematical Lemma Decomposer', desc: 'Deconstructs macro-claims into atomic parity and algebraic invariants (e.g. alternating digit sums modulo 11).' },
-      { id: 'form', name: 'Formalizer', role: 'Lean 4 Theorem Verifier', desc: 'Executes lake env lean and records an exact declaration check, source hash, and axiom report.' },
-      { id: 'chron', name: 'Scientific Chronicler', role: 'Daily Dispatch & Ledger Synthesizer', desc: 'Compiles each cycle\'s discoveries into The Daily Palindrome articles and maintains the JSONL audit ledger.' }
+      { id: 'rm', name: 'Research Manager', role: 'Curriculum DAG & Priority Engine', desc: 'Validates pm_state.json, selects dependency-ready work, and enforces lifecycle transitions.' },
+      { id: 'comp', name: 'Computationalist', role: 'Empirical Scanner & Counterexamples', desc: 'Runs the configured bounded search and stops a candidate before proof planning when evidence contradicts it.' },
+      { id: 'strat', name: 'Proof Strategist', role: 'Exact Proof Planner', desc: 'Maps a surviving candidate to its configured Lean module and declaration, with a concrete proof decomposition.' },
+      { id: 'form', name: 'Formalizer', role: 'Lean 4 Theorem Verifier', desc: 'Builds the package, checks the exact declaration, and records its source hash and axiom report.' },
+      { id: 'chron', name: 'Scientific Chronicler', role: 'Publication & Ledger Synthesizer', desc: 'Publishes the cycle volume or outlook, synchronizes site indexes, and maintains the JSONL audit ledger.' }
     ];
 
     let agentsHtml = '';
@@ -924,16 +925,18 @@
 
         <div class="entry-content">
           <h2>1. Multi-Agent Orchestration Diagram</h2>
-          <p>Visual schema of agent interactions across one autonomous cycle:</p>
+          <p>The per-candidate gates run in sequence. Failed gates skip later proof stages and go directly to the recorded cycle outcome.</p>
 
           <div class="diagram-box">
-            <svg viewBox="0 0 760 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 920 230" width="100%" height="auto" role="img" aria-label="Sequential multi-agent research workflow" xmlns="http://www.w3.org/2000/svg">
               <style>
                 .box { fill: #ffffff; stroke: #111111; stroke-width: 1.5; }
                 .box-highlight { fill: #fcfcfc; stroke: #111111; stroke-width: 2; }
-                .txt-title { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; fill: #111111; text-anchor: middle; }
-                .txt-sub { font-family: 'Georgia', serif; font-size: 11px; fill: #444444; text-anchor: middle; }
+                .txt-title { font-family: 'Courier New', monospace; font-size: 12px; font-weight: bold; fill: #111111; text-anchor: middle; }
+                .txt-sub { font-family: 'Georgia', serif; font-size: 10px; fill: #444444; text-anchor: middle; }
+                .txt-edge { font-family: 'Georgia', serif; font-size: 9px; fill: #555555; text-anchor: middle; }
                 .arrow { stroke: #111111; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead2); }
+                .arrow-stop { stroke: #777777; stroke-width: 1.2; stroke-dasharray: 5,4; fill: none; marker-end: url(#arrowhead2); }
               </style>
               <defs>
                 <marker id="arrowhead2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
@@ -941,47 +944,53 @@
                 </marker>
               </defs>
 
-              <rect x="230" y="20" width="300" height="55" class="box-highlight" />
-              <text x="380" y="42" class="txt-title">RESEARCH MANAGER (PI)</text>
-              <text x="380" y="60" class="txt-sub">Curriculum DAG &amp; Priority Triage Engine</text>
+              <rect x="10" y="55" width="160" height="72" class="box-highlight" />
+              <text x="90" y="78" class="txt-title">RESEARCH MANAGER</text>
+              <text x="90" y="98" class="txt-sub">Curriculum DAG</text>
+              <text x="90" y="113" class="txt-sub">Selects ready work</text>
 
-              <line x1="380" y1="75" x2="380" y2="120" class="arrow" />
-              <line x1="120" y1="120" x2="640" y2="120" stroke="#111111" stroke-width="1.5" />
-              <line x1="120" y1="120" x2="120" y2="150" class="arrow" />
-              <line x1="380" y1="120" x2="380" y2="150" class="arrow" />
-              <line x1="640" y1="120" x2="640" y2="150" class="arrow" />
+              <rect x="195" y="55" width="160" height="72" class="box" />
+              <text x="275" y="78" class="txt-title">COMPUTATIONALIST</text>
+              <text x="275" y="98" class="txt-sub">Empirical search</text>
+              <text x="275" y="113" class="txt-sub">Counterexample gate</text>
 
-              <rect x="20" y="150" width="200" height="60" class="box" />
-              <text x="120" y="174" class="txt-title">COMPUTATIONALIST</text>
-              <text x="120" y="192" class="txt-sub">Empirical Scan &amp; Counterexamples</text>
+              <rect x="380" y="55" width="160" height="72" class="box" />
+              <text x="460" y="78" class="txt-title">PROOF STRATEGIST</text>
+              <text x="460" y="98" class="txt-sub">Exact module + declaration</text>
+              <text x="460" y="113" class="txt-sub">Proof plan</text>
 
-              <rect x="280" y="150" width="200" height="60" class="box" />
-              <text x="380" y="174" class="txt-title">PROOF STRATEGIST</text>
-              <text x="380" y="192" class="txt-sub">Lemma &amp; Parity Decomposition</text>
+              <rect x="565" y="55" width="160" height="72" class="box" />
+              <text x="645" y="78" class="txt-title">FORMALIZER</text>
+              <text x="645" y="98" class="txt-sub">Lean build + exact check</text>
+              <text x="645" y="113" class="txt-sub">Axiom certificate</text>
 
-              <rect x="540" y="150" width="200" height="60" class="box" />
-              <text x="640" y="174" class="txt-title">FORMALIZER AGENT</text>
-              <text x="640" y="192" class="txt-sub">Lean 4 Kernel Verifier (lake build)</text>
+              <rect x="750" y="55" width="160" height="72" class="box-highlight" />
+              <text x="830" y="78" class="txt-title">CHRONICLER</text>
+              <text x="830" y="98" class="txt-sub">Volume + JSONL ledger</text>
+              <text x="830" y="113" class="txt-sub">Site indexes</text>
 
-              <line x1="120" y1="210" x2="120" y2="245" stroke="#111111" stroke-width="1.5" />
-              <line x1="380" y1="210" x2="380" y2="245" stroke="#111111" stroke-width="1.5" />
-              <line x1="640" y1="210" x2="640" y2="245" stroke="#111111" stroke-width="1.5" />
-              <line x1="120" y1="245" x2="640" y2="245" stroke="#111111" stroke-width="1.5" />
-              <line x1="380" y1="245" x2="380" y2="275" class="arrow" />
+              <line x1="170" y1="91" x2="195" y2="91" class="arrow" />
+              <line x1="355" y1="91" x2="380" y2="91" class="arrow" />
+              <line x1="540" y1="91" x2="565" y2="91" class="arrow" />
+              <line x1="725" y1="91" x2="750" y2="91" class="arrow" />
 
-              <rect x="230" y="275" width="300" height="55" class="box-highlight" />
-              <text x="380" y="297" class="txt-title">SCIENTIFIC CHRONICLER</text>
-              <text x="380" y="315" class="txt-sub">The Daily Palindrome &amp; JSONL Ledger</text>
+              <text x="182" y="45" class="txt-edge">candidate</text>
+              <text x="367" y="45" class="txt-edge">survives</text>
+              <text x="552" y="45" class="txt-edge">exact target</text>
+              <text x="737" y="45" class="txt-edge">outcome</text>
+
+              <path d="M 275 127 C 330 195, 760 195, 815 127" class="arrow-stop" />
+              <text x="545" y="205" class="txt-edge">counterexamples and failed gates are recorded without being promoted</text>
             </svg>
           </div>
 
           <h2>2. Curriculum Proof Dependency Graph (DAG)</h2>
           <p>
-            The mathematical dependency hierarchy. Verified nodes in green unlock downstream theorems:
+            The current dependency hierarchy from foundational definitions to all ten certified declarations:
           </p>
 
           <div class="diagram-box">
-            <svg viewBox="0 0 760 380" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 760 300" width="100%" height="auto" role="img" aria-label="Current Lean proof dependency graph" xmlns="http://www.w3.org/2000/svg">
               <style>
                 .dag-box-green { fill: #f1f8e9; stroke: #2e7d32; stroke-width: 1.5; }
                 .dag-box-gray { fill: #fafafa; stroke: #888888; stroke-width: 1.5; stroke-dasharray: 4,3; }
@@ -1023,26 +1032,32 @@
               <text x="590" y="133" class="dag-txt-id">[LEMMA-004]</text>
               <text x="590" y="148" class="dag-txt-desc">Base-b Div by (b+1)</text>
 
-              <!-- Edge from LEMMA-001 to THM-001 -->
-              <line x1="280" y1="165" x2="280" y2="215" class="dag-edge" />
+              <!-- Current downstream dependency edges -->
+              <line x1="100" y1="165" x2="100" y2="220" class="dag-edge" />
+              <line x1="280" y1="165" x2="265" y2="220" class="dag-edge" />
+              <line x1="280" y1="165" x2="455" y2="220" class="dag-edge" />
+              <line x1="660" y1="165" x2="655" y2="220" class="dag-edge" />
 
-              <!-- Level 1 Theorem: THM-001 -->
-              <rect x="200" y="215" width="160" height="50" class="${dagClass('THM-001')}" />
-              <text x="210" y="233" class="dag-txt-id">[THM-001]</text>
-              <text x="210" y="248" class="dag-txt-desc">11 Unique 2-digit Prime</text>
+              <!-- Certified downstream results -->
+              <rect x="20" y="220" width="160" height="55" class="${dagClass('CONJ-003')}" />
+              <text x="30" y="239" class="dag-txt-id">[CONJ-003]</text>
+              <text x="30" y="254" class="dag-txt-desc">Single-digit additive base</text>
+              <text x="30" y="267" class="dag-txt-desc">depends on LEMMA-000</text>
 
-              <!-- Edge from LEMMA-001/002 to Higher Conjectures -->
-              <line x1="280" y1="265" x2="280" y2="305" class="dag-edge" />
-              <line x1="480" y1="165" x2="480" y2="305" class="dag-edge" />
+              <rect x="190" y="220" width="150" height="55" class="${dagClass('THM-001')}" />
+              <text x="200" y="239" class="dag-txt-id">[THM-001]</text>
+              <text x="200" y="254" class="dag-txt-desc">11 unique 2-digit prime</text>
+              <text x="200" y="267" class="dag-txt-desc">depends on LEMMA-001</text>
 
-              <!-- Level 2/3 Conjectures (Queued) -->
-              <rect x="180" y="305" width="200" height="50" class="${dagClass('CONJ-002')}" />
-              <text x="190" y="323" class="dag-txt-id">[CONJ-002] Tier 2</text>
-              <text x="190" y="338" class="dag-txt-desc">Carrieless Palindromic Squares</text>
+              <rect x="355" y="220" width="200" height="55" class="${dagClass('CONJ-002')}" />
+              <text x="365" y="239" class="dag-txt-id">[CONJ-002]</text>
+              <text x="365" y="254" class="dag-txt-desc">Carrieless square identity</text>
+              <text x="365" y="267" class="dag-txt-desc">depends on DEF-001 + LEMMA-001</text>
 
-              <rect x="400" y="305" width="200" height="50" class="${dagClass('CONJ-003')}" />
-              <text x="410" y="323" class="dag-txt-id">[CONJ-003] Tier 3</text>
-              <text x="410" y="338" class="dag-txt-desc">Additive 3-Palindrome Decomp</text>
+              <rect x="570" y="220" width="170" height="55" class="${dagClass('ENUM-001')}" />
+              <text x="580" y="239" class="dag-txt-id">[ENUM-001]</text>
+              <text x="580" y="254" class="dag-txt-desc">Constructor injectivity</text>
+              <text x="580" y="267" class="dag-txt-desc">depends on LEMMA-004</text>
             </svg>
           </div>
 
