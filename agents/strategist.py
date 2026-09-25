@@ -28,7 +28,26 @@ class ProofStrategist:
             "target_declaration": target_declaration,
         }
         
-        if empirical_type == "two_digit_constructor_injective":
+        if empirical_type == "two_digit_palindrome_count":
+            return common | {
+                "strategy_type": "Finite Enumeration and Injectivity",
+                "core_insight": (
+                    "Enumerate the nonzero base-b digits with List.range (b - 1), map the repeated-digit "
+                    "constructor over that list, and combine preservation of list length with the established "
+                    "injectivity theorem to prove the resulting values are distinct."
+                ),
+                "modular_lemmas": [
+                    {
+                        "id": hypothesis_id,
+                        "name": "two_digit_palindrome_count",
+                        "statement": "the canonical list has length b - 1 and contains no duplicates",
+                        "tactic_hint": "simp for length; pairwise_map plus constructor injectivity for Nodup",
+                    }
+                ],
+                "recommended_module": "Continuum.Enumeration",
+            }
+
+        elif empirical_type == "two_digit_constructor_injective":
             return common | {
                 "strategy_type": "Factorization and Cancellation",
                 "core_insight": (

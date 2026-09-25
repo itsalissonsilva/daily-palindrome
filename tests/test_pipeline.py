@@ -84,10 +84,12 @@ class StrategyTests(unittest.TestCase):
         powers = copy.deepcopy(by_id["CONJ-002"])
         additive = copy.deepcopy(by_id["CONJ-003"])
         enumeration = copy.deepcopy(by_id["ENUM-001"])
+        counting = copy.deepcopy(by_id["ENUM-002"])
 
         powers_strategy = strategist.decompose(powers["id"], powers)
         additive_strategy = strategist.decompose(additive["id"], additive)
         enumeration_strategy = strategist.decompose(enumeration["id"], enumeration)
+        counting_strategy = strategist.decompose(counting["id"], counting)
 
         self.assertEqual(powers_strategy["strategy_type"], "Polynomial Identity")
         self.assertEqual(powers_strategy["target_declaration"], "carrieless_square_identity")
@@ -98,6 +100,8 @@ class StrategyTests(unittest.TestCase):
             enumeration_strategy["target_declaration"],
             "two_digit_palindrome_constructor_injective",
         )
+        self.assertEqual(counting_strategy["strategy_type"], "Finite Enumeration and Injectivity")
+        self.assertEqual(counting_strategy["target_declaration"], "two_digit_palindrome_count")
 
 
 class FormalizerInputTests(unittest.TestCase):

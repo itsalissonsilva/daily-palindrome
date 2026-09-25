@@ -278,6 +278,45 @@ class Experimenter:
             "base": f"{min_base}–{max_base}",
         }
 
+    def test_two_digit_palindrome_count(
+        self, min_base: int = 2, max_base: int = 16
+    ) -> Dict[str, Any]:
+        """Check that the canonical two-digit construction yields b - 1 distinct palindromes."""
+        _validate_base(min_base)
+        if max_base < min_base:
+            raise ValueError("max_base must be at least min_base")
+
+        start_time = time.perf_counter()
+        tested_count = 0
+        counterexamples = []
+        samples = []
+        for base in range(min_base, max_base + 1):
+            values = [base * digit + digit for digit in range(1, base)]
+            tested_count += len(values)
+            expected_count = base - 1
+            reasons = []
+            if len(values) != expected_count:
+                reasons.append("wrong enumeration length")
+            if len(set(values)) != expected_count:
+                reasons.append("duplicate values")
+            if not all(is_palindrome(value, base) for value in values):
+                reasons.append("non-palindromic value")
+            if reasons:
+                counterexamples.append({"base": base, "reasons": reasons, "values": values})
+            if len(samples) < 5:
+                samples.append({"base": base, "count": len(values), "values": values[:5]})
+
+        return {
+            "hypothesis": "Base b has exactly b - 1 canonical two-digit palindrome values",
+            "tested_count": tested_count,
+            "counterexamples_found": len(counterexamples),
+            "counterexamples": counterexamples,
+            "verified_empirically": not counterexamples,
+            "elapsed_seconds": round(time.perf_counter() - start_time, 4),
+            "samples": samples,
+            "base": f"{min_base}–{max_base}",
+        }
+
     def analyze_candidate(self, candidate_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Dispatcher for candidate hypotheses sent by PM."""
         task_type = payload.get("type")
@@ -313,6 +352,11 @@ class Experimenter:
             result = self.test_single_digit_three_palindrome_sum()
         elif task_type == "two_digit_constructor_injective":
             result = self.test_two_digit_constructor_injective(
+                min_base=payload.get("min_base", 2),
+                max_base=payload.get("max_base", 16),
+            )
+        elif task_type == "two_digit_palindrome_count":
+            result = self.test_two_digit_palindrome_count(
                 min_base=payload.get("min_base", 2),
                 max_base=payload.get("max_base", 16),
             )

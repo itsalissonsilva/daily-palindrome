@@ -52,6 +52,12 @@ class ExperimenterTests(unittest.TestCase):
         self.assertEqual(result["tested_count"], 120)
         self.assertEqual(result["counterexamples_found"], 0)
 
+    def test_two_digit_palindrome_count_across_supported_bases(self):
+        result = Experimenter().test_two_digit_palindrome_count(2, 16)
+        self.assertTrue(result["verified_empirically"], result)
+        self.assertEqual(result["tested_count"], 120)
+        self.assertEqual(result["counterexamples_found"], 0)
+
     def test_invalid_base_is_rejected(self):
         with self.assertRaises(ValueError):
             digits_in_base(12, 1)

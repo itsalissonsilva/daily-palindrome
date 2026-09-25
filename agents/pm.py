@@ -173,6 +173,21 @@ DEFAULT_CURRICULUM = {
                 "min_base": 2,
                 "max_base": 16
             }
+        },
+        {
+            "id": "ENUM-002",
+            "title": "The canonical two-digit palindrome construction yields b - 1 distinct values",
+            "tier": 5,
+            "status": "QUEUED",
+            "type": "lemma",
+            "module": "Enumeration",
+            "lemma_name": "two_digit_palindrome_count",
+            "dependencies": ["ENUM-001"],
+            "empirical_task": {
+                "type": "two_digit_palindrome_count",
+                "min_base": 2,
+                "max_base": 16
+            }
         }
     ],
     "proven_knowledge_base": [],
