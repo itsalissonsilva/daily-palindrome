@@ -468,7 +468,7 @@
     <!-- Primary Article Feed / Dynamic View -->
     <main id="primary">
       <div id="main-view">
-        <div class="loading-notice">Retrieving dispatch archives...</div>
+        <div class="loading-notice">Retrieving research logs...</div>
       </div>
     </main>
 
@@ -650,7 +650,7 @@
   /* ---------------- HOME PAGE: Last 3 Posts + Pagination (No Duplicate Title) ---------------- */
   async function renderHomePage(page = 1) {
     const container = document.getElementById('main-view');
-    container.innerHTML = '<div class="loading-notice">Loading dispatches...</div>';
+    container.innerHTML = '<div class="loading-notice">Loading research logs...</div>';
 
     if (!dispatches || dispatches.length === 0) {
       container.innerHTML = '<p>No publications found. Run <code>python main.py --run-cycle</code> to generate a research volume.</p>';
@@ -718,7 +718,7 @@
   /* ---------------- SINGLE POST PERMALINK ---------------- */
   async function renderSinglePost(filename) {
     const container = document.getElementById('main-view');
-    container.innerHTML = '<div class="loading-notice">Loading dispatch...</div>';
+    container.innerHTML = '<div class="loading-notice">Loading research log...</div>';
 
     try {
       const res = await fetch(`articles/${filename}`);
