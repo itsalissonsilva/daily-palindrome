@@ -58,6 +58,12 @@ class ExperimenterTests(unittest.TestCase):
         self.assertEqual(result["tested_count"], 120)
         self.assertEqual(result["counterexamples_found"], 0)
 
+    def test_three_digit_constructor_is_injective_across_supported_bases(self):
+        result = Experimenter().test_three_digit_constructor_injective(2, 16)
+        self.assertTrue(result["verified_empirically"], result)
+        self.assertEqual(result["tested_count"], 1360)
+        self.assertEqual(result["counterexamples_found"], 0)
+
     def test_invalid_base_is_rejected(self):
         with self.assertRaises(ValueError):
             digits_in_base(12, 1)

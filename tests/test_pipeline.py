@@ -3,6 +3,8 @@ import json
 import os
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from agents.formalizer import Formalizer
 from agents.pm import DEFAULT_CURRICULUM, ItemStatus, ProjectManager
@@ -85,11 +87,13 @@ class StrategyTests(unittest.TestCase):
         additive = copy.deepcopy(by_id["CONJ-003"])
         enumeration = copy.deepcopy(by_id["ENUM-001"])
         counting = copy.deepcopy(by_id["ENUM-002"])
+        three_digit = copy.deepcopy(by_id["ENUM-003"])
 
         powers_strategy = strategist.decompose(powers["id"], powers)
         additive_strategy = strategist.decompose(additive["id"], additive)
         enumeration_strategy = strategist.decompose(enumeration["id"], enumeration)
         counting_strategy = strategist.decompose(counting["id"], counting)
+        three_digit_strategy = strategist.decompose(three_digit["id"], three_digit)
 
         self.assertEqual(powers_strategy["strategy_type"], "Polynomial Identity")
         self.assertEqual(powers_strategy["target_declaration"], "carrieless_square_identity")
@@ -102,9 +106,23 @@ class StrategyTests(unittest.TestCase):
         )
         self.assertEqual(counting_strategy["strategy_type"], "Finite Enumeration and Injectivity")
         self.assertEqual(counting_strategy["target_declaration"], "two_digit_palindrome_count")
+        self.assertEqual(three_digit_strategy["strategy_type"], "Modular Digit Recovery")
+        self.assertEqual(
+            three_digit_strategy["target_declaration"],
+            "three_digit_palindrome_constructor_injective",
+        )
 
 
 class FormalizerInputTests(unittest.TestCase):
+    def test_lean_subprocess_uses_utf8_with_replacement(self):
+        with patch("agents.formalizer.subprocess.run") as run:
+            run.return_value = SimpleNamespace(stdout="", stderr="", returncode=0)
+            result = Formalizer("formal").lake_build()
+
+        self.assertTrue(result["success"])
+        self.assertEqual(run.call_args.kwargs["encoding"], "utf-8")
+        self.assertEqual(run.call_args.kwargs["errors"], "replace")
+
     def test_lean_identifier_injection_is_rejected(self):
         result = Formalizer("formal").verify_lemma("Common", "x\n#eval 1")
         self.assertFalse(result["verified"])

@@ -28,7 +28,26 @@ class ProofStrategist:
             "target_declaration": target_declaration,
         }
         
-        if empirical_type == "two_digit_palindrome_count":
+        if empirical_type == "three_digit_constructor_injective":
+            return common | {
+                "strategy_type": "Modular Digit Recovery",
+                "core_insight": (
+                    "Reduce equality of the constructed values modulo b to recover the bounded leading digit. "
+                    "After substituting that equality, cancel the common outer factor b and the shared leading "
+                    "term to recover the middle digit."
+                ),
+                "modular_lemmas": [
+                    {
+                        "id": hypothesis_id,
+                        "name": "three_digit_palindrome_constructor_injective",
+                        "statement": "equal [a, m, a] values with a < b have equal leading and middle digits",
+                        "tactic_hint": "take congrArg (% b), substitute the leading digit, then cancel",
+                    }
+                ],
+                "recommended_module": "Continuum.Enumeration",
+            }
+
+        elif empirical_type == "two_digit_palindrome_count":
             return common | {
                 "strategy_type": "Finite Enumeration and Injectivity",
                 "core_insight": (

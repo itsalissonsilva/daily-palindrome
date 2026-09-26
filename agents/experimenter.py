@@ -317,6 +317,52 @@ class Experimenter:
             "base": f"{min_base}–{max_base}",
         }
 
+    def test_three_digit_constructor_injective(
+        self, min_base: int = 2, max_base: int = 16
+    ) -> Dict[str, Any]:
+        """Check that [a, m, a] uniquely determines its valid base-b digits."""
+        _validate_base(min_base)
+        if max_base < min_base:
+            raise ValueError("max_base must be at least min_base")
+
+        start_time = time.perf_counter()
+        tested_count = 0
+        counterexamples = []
+        samples = []
+        for base in range(min_base, max_base + 1):
+            values = []
+            for leading in range(1, base):
+                for middle in range(base):
+                    value = base * (base * leading + middle) + leading
+                    tested_count += 1
+                    values.append(value)
+                    if not is_palindrome(value, base):
+                        counterexamples.append(
+                            {
+                                "base": base,
+                                "leading": leading,
+                                "middle": middle,
+                                "value": value,
+                                "reason": "not palindromic",
+                            }
+                        )
+
+            if len(set(values)) != len(values):
+                counterexamples.append({"base": base, "reason": "constructor collision"})
+            if len(samples) < 5:
+                samples.append({"base": base, "count": len(values), "values": values[:5]})
+
+        return {
+            "hypothesis": "The three-digit palindrome constructor uniquely determines both digits",
+            "tested_count": tested_count,
+            "counterexamples_found": len(counterexamples),
+            "counterexamples": counterexamples,
+            "verified_empirically": not counterexamples,
+            "elapsed_seconds": round(time.perf_counter() - start_time, 4),
+            "samples": samples,
+            "base": f"{min_base}–{max_base}",
+        }
+
     def analyze_candidate(self, candidate_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Dispatcher for candidate hypotheses sent by PM."""
         task_type = payload.get("type")
@@ -357,6 +403,11 @@ class Experimenter:
             )
         elif task_type == "two_digit_palindrome_count":
             result = self.test_two_digit_palindrome_count(
+                min_base=payload.get("min_base", 2),
+                max_base=payload.get("max_base", 16),
+            )
+        elif task_type == "three_digit_constructor_injective":
+            result = self.test_three_digit_constructor_injective(
                 min_base=payload.get("min_base", 2),
                 max_base=payload.get("max_base", 16),
             )

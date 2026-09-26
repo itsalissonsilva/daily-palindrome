@@ -188,6 +188,21 @@ DEFAULT_CURRICULUM = {
                 "min_base": 2,
                 "max_base": 16
             }
+        },
+        {
+            "id": "ENUM-003",
+            "title": "The three-digit palindrome constructor uniquely determines both digits",
+            "tier": 6,
+            "status": "QUEUED",
+            "type": "lemma",
+            "module": "Enumeration",
+            "lemma_name": "three_digit_palindrome_constructor_injective",
+            "dependencies": ["ENUM-002"],
+            "empirical_task": {
+                "type": "three_digit_constructor_injective",
+                "min_base": 2,
+                "max_base": 16
+            }
         }
     ],
     "proven_knowledge_base": [],

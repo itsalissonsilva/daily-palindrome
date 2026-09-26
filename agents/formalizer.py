@@ -19,6 +19,18 @@ class Formalizer:
         self.formal_dir = os.path.abspath(formal_dir)
         self.name = "FormalizationAgent"
 
+    def _run_lean_command(self, cmd, timeout: int):
+        """Run Lean with deterministic Unicode decoding on every platform."""
+        return subprocess.run(
+            cmd,
+            cwd=self.formal_dir,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+        )
+
     def check_file(self, rel_path: str) -> Dict[str, Any]:
         """Runs lean directly on a specific file within the package."""
         full_path = os.path.join(self.formal_dir, rel_path)
@@ -31,13 +43,7 @@ class Formalizer:
         try:
             # Run lean via lake env to ensure all module dependencies and LEAN_PATH are resolved
             cmd = ["lake", "env", "lean", full_path]
-            result = subprocess.run(
-                cmd,
-                cwd=self.formal_dir,
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
+            result = self._run_lean_command(cmd, timeout=60)
 
             stdout = result.stdout
             stderr = result.stderr
@@ -82,13 +88,7 @@ class Formalizer:
         """Runs `lake build` to compile and verify the entire Lean 4 library."""
         try:
             cmd = ["lake", "build"]
-            result = subprocess.run(
-                cmd,
-                cwd=self.formal_dir,
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
+            result = self._run_lean_command(cmd, timeout=120)
 
             output = (result.stdout + "\n" + result.stderr).strip()
             success = result.returncode == 0 and "error:" not in output
@@ -155,12 +155,8 @@ class Formalizer:
                 probe_path = probe_file.name
                 probe_file.write(probe_source)
 
-            result = subprocess.run(
-                ["lake", "env", "lean", probe_path],
-                cwd=self.formal_dir,
-                capture_output=True,
-                text=True,
-                timeout=60,
+            result = self._run_lean_command(
+                ["lake", "env", "lean", probe_path], timeout=60
             )
             output = (result.stdout + "\n" + result.stderr).strip()
             uses_sorry = "sorryAx" in output or "declaration uses 'sorry'" in output
